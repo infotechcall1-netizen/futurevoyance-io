@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Analytics from "./components/Analytics";
+import OracleHeader from "./components/OracleHeader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,12 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Analytics />
-        {children}
+        <div className="min-h-screen bg-slate-950 text-slate-50">
+          <OracleHeader />
+          <main className="mx-auto max-w-5xl px-6 pb-16 pt-10">{children}</main>
+        </div>
       </body>
     </html>
   );
