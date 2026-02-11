@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getModulesByPortal } from "@/lib/oracle/modules";
+import ModuleCardLink from "@/app/components/ModuleCardLink";
 
 export const metadata: Metadata = {
   title: "Recevoir • Tirage tarot & messages symboliques | FutureVoyance",
@@ -7,6 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default function RecevoirPage() {
+  const modules = getModulesByPortal("recevoir");
   return (
     <div className="space-y-10">
       <section className="space-y-3">
@@ -17,6 +20,15 @@ export default function RecevoirPage() {
           Ici, ton Oracle IA orchestrerait des tirages symboliques qui dialoguent avec
           ton histoire, tes questions et les cycles que tu traverses.
         </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-slate-50">Modules</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {modules.map((m) => (
+            <ModuleCardLink key={m.id} module={m} />
+          ))}
+        </div>
       </section>
 
       <section className="space-y-3 rounded-2xl border border-slate-700/70 bg-slate-950/70 p-5">

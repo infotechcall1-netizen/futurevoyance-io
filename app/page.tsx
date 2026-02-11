@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import PortalCard from "./components/PortalCard";
+import OracleLive from "./components/OracleLive";
+import OracleChat from "./components/OracleChat";
+import { oracleOfDay } from "./lib/oracle";
 
 export const metadata: Metadata = {
   title: "FutureVoyance • Oracle IA du jour",
@@ -8,12 +11,14 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  const today = new Date().toLocaleDateString("fr-FR", {
+  const now = new Date();
+  const todayLabel = now.toLocaleDateString("fr-FR", {
     weekday: "long",
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
+  const dayOracle = oracleOfDay(now);
 
   return (
     <div className="space-y-14">
@@ -41,64 +46,10 @@ export default function Home() {
             Activer mon Oracle
           </button>
         </div>
+        <OracleChat />
       </section>
 
-      {/* Vibration du jour */}
-      <section className="grid gap-6 rounded-3xl border border-violet-500/25 bg-slate-950/60 p-6 shadow-[0_0_80px_rgba(15,23,42,0.9)] ring-1 ring-slate-50/5 md:grid-cols-[1.1fr_1.2fr]">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-violet-200/90">
-            Vibration du jour
-          </p>
-          <p className="text-sm text-slate-300/90">{today}</p>
-          <p className="mt-4 text-3xl font-semibold text-violet-100">
-            7 – Introspection guidée
-          </p>
-          <p className="mt-2 text-sm text-slate-300/90">
-            Aujourd&apos;hui, l&apos;énergie t&apos;invite à ralentir, à
-            écouter les signes subtils et à faire confiance aux réponses qui
-            émergent de ton espace intérieur.
-          </p>
-        </div>
-        <div className="space-y-3 rounded-2xl border border-violet-500/20 bg-gradient-to-br from-slate-900 via-slate-950 to-violet-950/60 p-5">
-          <p className="text-xs font-medium uppercase tracking-[0.28em] text-violet-200/90">
-            Message de l&apos;Oracle
-          </p>
-          <p className="text-sm text-slate-200/90">
-            « Placeholder – ici, ton message du jour généré par l&apos;Oracle
-            IA. Une phrase claire, douce, qui éclaire ta direction du moment. »
-          </p>
-        </div>
-      </section>
-
-      {/* Activer ton Oracle personnel */}
-      <section className="space-y-5 rounded-3xl border border-slate-700/70 bg-slate-950/60 p-6">
-        <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-slate-50">
-            Activer ton Oracle personnel
-          </h2>
-          <p className="text-sm text-slate-300/85">
-            Commence par ancrer ta date de naissance. L&apos;Oracle l&apos;utilisera
-            ensuite pour tisser tes cycles, tes nombres et tes rendez-vous
-            énergétiques.
-          </p>
-        </div>
-        <form className="flex flex-wrap items-center gap-3">
-          <label className="flex flex-col text-xs text-slate-300/80">
-            Date de naissance
-            <input
-              type="date"
-              className="mt-1 w-52 rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none ring-0 placeholder:text-slate-500 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/60"
-            />
-          </label>
-          <button className="mt-4 rounded-full bg-violet-500 px-6 py-2.5 text-sm font-medium text-slate-50 shadow-[0_0_40px_rgba(139,92,246,0.6)] transition hover:bg-violet-400 sm:mt-6">
-            Activer mon Oracle
-          </button>
-        </form>
-        <p className="text-xs text-slate-400/90">
-          Bientôt : création automatique de ton profil numérologique, suivi de
-          tes périodes clés et synchronisation avec tes rituels favoris.
-        </p>
-      </section>
+      <OracleLive todayLabel={todayLabel} initialDayOracle={dayOracle} />
 
       {/* Choisis une porte */}
       <section className="space-y-4">
