@@ -34,3 +34,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Authentication Env Vars
+
+To enable magic-link login with Auth.js, set:
+
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL`
+- `EMAIL_SERVER`
+- `EMAIL_FROM`
+- `UPSTASH_REDIS_URL`
+- `UPSTASH_REDIS_TOKEN`
+
+Note: Upstash on Vercel often provides `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
+You can duplicate those values into `UPSTASH_REDIS_URL` / `UPSTASH_REDIS_TOKEN`.

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import PortalCard from "./components/PortalCard";
 import OracleLive from "./components/OracleLive";
 import OracleChat from "./components/OracleChat";
+import ViewEvent from "./components/ViewEvent";
 import { oracleOfDay } from "./lib/oracle";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function Home() {
 
   return (
     <div className="space-y-14">
+      <ViewEvent name="view_oracle_home" />
       {/* Hero */}
       <section className="space-y-6">
         <p className="text-xs font-medium uppercase tracking-[0.25em] text-violet-200/80">

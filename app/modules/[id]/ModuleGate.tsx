@@ -1,34 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ModuleDef } from "@/lib/oracle/modules";
 import { trackEvent } from "@/lib/analytics/track";
 import Paywall from "@/app/components/Paywall";
 import OracleChat from "@/app/components/OracleChat";
+import { PRICING_CATALOG, DEFAULT_PRICE_LABEL, DEFAULT_PRICE_VALUE, DEFAULT_PRICE_TIER } from "@/lib/pricing/catalog";
 
 const STORAGE_PREFIX = "fv_entitled_";
+const VERIFY_BACKOFF_MS = [0, 1200, 2500, 8000, 12000];
 
-const PRICE_LABELS: Record<string, string> = {
-  "shadow-mirror": "2,99 €",
-  "next-step-love": "3,99 €",
-  "decision-ab": "2,99 €",
-  "abundance-key": "3,99 €",
-};
 
-const PRICE_TIERS: Record<string, "2.99" | "3.99"> = {
-  "shadow-mirror": "2.99",
-  "decision-ab": "2.99",
-  "next-step-love": "3.99",
-  "abundance-key": "3.99",
-};
-
-const PURCHASE_VALUES: Record<string, number> = {
-  "shadow-mirror": 2.99,
-  "decision-ab": 2.99,
-  "next-step-love": 3.99,
-  "abundance-key": 3.99,
-};
 
 function getStorageKey(moduleId: string): string {
   return `${STORAGE_PREFIX}${moduleId}`;
@@ -45,44 +28,117 @@ function setUnlockedStorage(moduleId: string): void {
   }
 }
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 type ModuleGateProps = {
   module: ModuleDef;
 };
 
 export default function ModuleGate({ module }: ModuleGateProps) {
+  const isDev = process.env.NODE_ENV === "development";
   const searchParams = useSearchParams();
   const [unlocked, setUnlocked] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const paywallTrackedRef = useRef(false);
+
+  async function fetchEntitlement(moduleId: string): Promise<boolean> {
+    try {
+      const res = await fetch(
+        `/api/entitlements?module_id=${encodeURIComponent(moduleId)}`,
+        {
+          method: "GET",
+          cache: "no-store",
+          credentials: "include",
+        }
+      );
+      if (!res.ok) return false;
+      const data = (await res.json()) as { entitled?: boolean };
+      return data.entitled === true;
+    } catch {
+      return false;
+    }
+  }
 
   useEffect(() => {
-    const paid = searchParams.get("paid") === "1";
-    if (paid && module.isPremium) {
-      setUnlockedStorage(module.id);
-      setUnlocked(true);
-      trackEvent("purchase_complete", {
-        portal_id: module.portal_id,
-        module_id: module.id,
-        value: PURCHASE_VALUES[module.id] ?? 2.99,
-        currency: "EUR",
-        method: "stripe_redirect_provisional",
-      });
-      window.history.replaceState({}, "", window.location.pathname);
-    } else {
-      setUnlocked(isUnlocked(module.id));
+    let cancelled = false;
+
+    async function syncEntitlementFromServer() {
+      const paid = searchParams.get("paid") === "1";
+
+      // UX: restore optimistic unlock quickly, then confirm server-side.
+      if (isUnlocked(module.id)) {
+        setUnlocked(true);
+      } else {
+        setUnlocked(false);
+      }
+
+      if (!module.isPremium) {
+        setMounted(true);
+        return;
+      }
+
+      const waitSchedule = paid ? VERIFY_BACKOFF_MS : [0];
+      let entitled = false;
+
+      for (const ms of waitSchedule) {
+        if (ms > 0) await delay(ms);
+        if (cancelled) return;
+        entitled = await fetchEntitlement(module.id);
+        if (entitled) break;
+      }
+      if (cancelled) return;
+
+      if (entitled) {
+        setUnlockedStorage(module.id);
+        setUnlocked(true);
+        if (paid) {
+          trackEvent("purchase_complete", {
+            portal_id: module.portal_id,
+            module_id: module.id,
+            value: PRICING_CATALOG[module.id]?.value ?? DEFAULT_PRICE_VALUE,
+            currency: "EUR",
+            method: "stripe_redirect_confirmed",
+          });
+          trackEvent("entitlement_granted", {
+            portal_id: module.portal_id,
+            module_id: module.id,
+            is_premium: true,
+            method: "server_check",
+          });
+          window.history.replaceState({}, "", window.location.pathname);
+        }
+      } else if (paid) {
+        setCheckoutError("Paiement non confirmé, contacte support.");
+      }
+
+      setMounted(true);
     }
-    setMounted(true);
+
+    void syncEntitlementFromServer();
+
+    return () => {
+      cancelled = true;
+    };
   }, [module.id, module.isPremium, module.portal_id, searchParams]);
 
   useEffect(() => {
+    paywallTrackedRef.current = false;
+  }, [module.id]);
+
+  useEffect(() => {
     if (!mounted || !module.isPremium) return;
-    if (!unlocked) {
-      trackEvent("view_paywall", {
-        module_id: module.id,
-        portal_id: module.portal_id,
-      });
-    }
+    if (unlocked || paywallTrackedRef.current) return;
+    trackEvent("view_paywall", {
+      module_id: module.id,
+      portal_id: module.portal_id,
+    });
+    paywallTrackedRef.current = true;
   }, [mounted, module.isPremium, module.id, module.portal_id, unlocked]);
 
   async function handleUnlock() {
@@ -93,7 +149,7 @@ export default function ModuleGate({ module }: ModuleGateProps) {
     trackEvent("initiate_checkout", {
       portal_id: module.portal_id,
       module_id: module.id,
-      price_tier: PRICE_TIERS[module.id] ?? "2.99",
+      price_tier: PRICING_CATALOG[module.id]?.tier ?? DEFAULT_PRICE_TIER,
     });
     setCheckoutError(null);
     setLoading(true);
@@ -146,7 +202,7 @@ export default function ModuleGate({ module }: ModuleGateProps) {
         <Paywall
           moduleId={module.id}
           title={module.title}
-          priceLabel={PRICE_LABELS[module.id] ?? "2,99 €"}
+          priceLabel={PRICING_CATALOG[module.id]?.label ?? DEFAULT_PRICE_LABEL}
           onUnlock={handleUnlock}
           disabled={loading}
         />
@@ -156,13 +212,15 @@ export default function ModuleGate({ module }: ModuleGateProps) {
         {checkoutError && (
           <div className="rounded-xl border border-rose-500/30 bg-rose-950/30 p-3">
             <p className="text-sm text-rose-200">{checkoutError}</p>
-            <button
-              type="button"
-              onClick={handleUnlockLocal}
-              className="mt-2 text-xs text-slate-400 underline hover:text-slate-300"
-            >
-              Débloquer en local (DEV)
-            </button>
+            {isDev && (
+              <button
+                type="button"
+                onClick={handleUnlockLocal}
+                className="mt-2 text-xs text-slate-400 underline hover:text-slate-300"
+              >
+                Débloquer en local (DEV)
+              </button>
+            )}
           </div>
         )}
       </div>

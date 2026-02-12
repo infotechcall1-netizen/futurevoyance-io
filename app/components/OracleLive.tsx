@@ -3,19 +3,14 @@
 import { useState } from "react";
 import type { OracleVibration } from "../lib/oracle";
 import { oraclePersonal } from "../lib/oracle";
+import { trackEvent } from "@/lib/analytics/track";
 
 type OracleLiveProps = {
   todayLabel: string;
   initialDayOracle: OracleVibration;
 };
 
-function trackEvent(name: string, params?: Record<string, unknown>) {
-  if (typeof window === "undefined") return;
-  const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
-  if (typeof gtag === "function") {
-    gtag("event", name, params ?? {});
-  }
-}
+
 
 export default function OracleLive({ todayLabel, initialDayOracle }: OracleLiveProps) {
   const [dayOracle] = useState<OracleVibration>(initialDayOracle);

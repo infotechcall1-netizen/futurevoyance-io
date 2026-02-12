@@ -1,12 +1,12 @@
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import Stripe from "stripe";
+import { PRICING_CATALOG } from "@/lib/pricing/catalog";
 
-const PRICE_IDS: Record<string, string> = {
-  "shadow-mirror": "price_1SzPTDF768amoxL24h29xXS3",
-  "decision-ab": "price_1SzPTDF768amoxL24h29xXS3",
-  "next-step-love": "price_1SzPUeF768amoxL2xqMsj9y6",
-  "abundance-key": "price_1SzPUeF768amoxL2xqMsj9y6",
-};
+export const runtime = "nodejs";
+
+import { UID_COOKIE, COOKIE_MAX_AGE } from "@/lib/constants";
 
 export async function POST(req: Request) {
   const secret = process.env.STRIPE_SECRET_KEY;
@@ -17,9 +17,11 @@ export async function POST(req: Request) {
     );
   }
 
-  const stripe = new Stripe(secret);
+  const stripe = new Stripe(secret, {
+    apiVersion: "2023-10-16" as unknown as Stripe.LatestApiVersion,
+  });
 
-  let body: { module_id?: string } = {};
+  let body: { module_id?: string; fv_uid?: string } = {};
   try {
     body = await req.json();
   } catch {
@@ -34,16 +36,21 @@ export async function POST(req: Request) {
     );
   }
 
-  const priceId = PRICE_IDS[module_id];
+  const pricing = PRICING_CATALOG[module_id];
+  const priceId = pricing?.stripe_price_id;
   if (!priceId) {
     return NextResponse.json(
-      { error: "Unknown module_id" },
+      { error: "Unknown module_id or no price configured" },
       { status: 400 }
     );
   }
 
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "http://localhost:3000";
+  const cookieStore = await cookies();
+  const cookieUid = (cookieStore.get(UID_COOKIE)?.value || "").trim();
+  const bodyUid = typeof body.fv_uid === "string" ? body.fv_uid.trim() : "";
+  const fvUid = cookieUid || bodyUid || randomUUID();
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -54,6 +61,8 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
+      client_reference_id: fvUid,
+      metadata: { module_id, fv_uid: fvUid },
       success_url: `${baseUrl}/modules/${module_id}?paid=1`,
       cancel_url: `${baseUrl}/modules/${module_id}?canceled=1`,
     });
@@ -65,7 +74,17 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ url: session.url });
+    const res = NextResponse.json({ url: session.url });
+    if (!cookieUid) {
+      res.cookies.set(UID_COOKIE, fvUid, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: COOKIE_MAX_AGE,
+      });
+    }
+    return res;
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Checkout failed" },

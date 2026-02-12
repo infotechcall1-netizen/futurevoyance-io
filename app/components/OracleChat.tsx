@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import ShareCard, { exportSvgToPng } from "./ShareCard";
 import SafetyBanner from "./SafetyBanner";
 import { trackEvent } from "@/lib/analytics/track";
+import type { PortalId } from "@/lib/oracle/schema";
 
 const PORTALS = [
   { id: "comprendre" as const, label: "Comprendre" },
@@ -11,8 +12,6 @@ const PORTALS = [
   { id: "prevoir" as const, label: "Prévoir" },
   { id: "recevoir" as const, label: "Recevoir" },
 ] as const;
-
-type PortalId = "comprendre" | "aimer" | "prevoir" | "recevoir";
 
 type OracleContent = {
   essentiel: string;
@@ -32,6 +31,7 @@ export default function OracleChat({
   defaultModuleId,
   lockPortal = false,
 }: OracleChatProps = {}) {
+  const isDev = process.env.NODE_ENV === "development";
   const [prompt, setPrompt] = useState("");
   const [portalId, setPortalId] = useState<PortalId>(defaultPortalId ?? "comprendre");
   const [loading, setLoading] = useState(false);
@@ -57,6 +57,11 @@ export default function OracleChat({
     setSafety(null);
     setRawJson(null);
     try {
+      trackEvent("submit_oracle_question", {
+        portal_id: portalId,
+        module_id: moduleId,
+      });
+      const t0 = performance.now();
       const res = await fetch("/api/oracle", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,6 +89,28 @@ export default function OracleChat({
         } else {
           setSafety(null);
         }
+        const latency_ms = Math.round(performance.now() - t0);
+        const safety_category =
+          typeof data?.safety?.category === "string"
+            ? data.safety.category
+            : "none";
+        trackEvent("receive_oracle_insight", {
+          portal_id: portalId,
+          module_id: moduleId,
+          latency_ms,
+          safety_category,
+        });
+
+        // Save to history silently in background
+        void fetch("/api/oracle/history", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            portal_id: portalId,
+            prompt: prompt.trim(),
+            response: data,
+          }),
+        }).catch((e) => console.error("[history_save_error]", e));
       } else {
         setError("Réponse invalide : pas de content.");
       }
@@ -107,11 +134,10 @@ export default function OracleChat({
                 key={p.id}
                 type="button"
                 onClick={() => setPortalId(p.id)}
-                className={`rounded-full px-4 py-2 text-xs font-medium transition ${
-                  portalId === p.id
-                    ? "bg-violet-500 text-slate-50"
-                    : "border border-violet-500/40 bg-transparent text-violet-200/90 hover:bg-violet-500/20"
-                }`}
+                className={`rounded-full px-4 py-2 text-xs font-medium transition ${portalId === p.id
+                  ? "bg-violet-500 text-slate-50"
+                  : "border border-violet-500/40 bg-transparent text-violet-200/90 hover:bg-violet-500/20"
+                  }`}
               >
                 {p.label}
               </button>
@@ -181,7 +207,7 @@ export default function OracleChat({
                       svg as SVGSVGElement,
                       `futurevoyance-${portalId}-${Date.now()}.png`
                     );
-                    trackEvent("share", {
+                    trackEvent("generate_share_card", {
                       method: "download_png",
                       portal_id: portalId,
                       module_id: moduleId,
@@ -208,7 +234,7 @@ export default function OracleChat({
           </div>
         </div>
       )}
-      {rawJson && (
+      {isDev && rawJson && (
         <details className="border-t border-slate-700/70 pt-3">
           <summary className="cursor-pointer text-xs text-slate-400 hover:text-slate-300">
             Debug (réponse JSON)

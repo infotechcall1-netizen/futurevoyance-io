@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { VertexAI } from "@google-cloud/vertexai";
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
 import { oracleResponseSchema, type OracleResponse } from "@/lib/oracle/schema";
 import { safeJson } from "@/lib/oracle/safeJson";
 import { normalizeOracleResponse } from "@/lib/oracle/normalize";
@@ -54,6 +56,27 @@ const FALLBACK_LECTURE = [
   "L'Oracle t'invite à poser un geste concret dans l'heure.",
 ];
 
+const upstashUrl = (process.env.UPSTASH_REDIS_REST_URL || "").trim();
+const upstashToken = (process.env.UPSTASH_REDIS_REST_TOKEN || "").trim();
+const hasUpstashRateLimit = upstashUrl.length > 0 && upstashToken.length > 0;
+const ratelimit = hasUpstashRateLimit
+  ? new Ratelimit({
+      redis: new Redis({ url: upstashUrl, token: upstashToken }),
+      limiter: Ratelimit.fixedWindow(10, "1 m"),
+      analytics: true,
+      prefix: "fv:oracle:ratelimit",
+    })
+  : null;
+
+function getClientIp(req: Request): string {
+  const forwarded = req.headers.get("x-forwarded-for") || "";
+  const ipFromForwarded = forwarded.split(",")[0]?.trim();
+  if (ipFromForwarded) return ipFromForwarded;
+  const realIp = (req.headers.get("x-real-ip") || "").trim();
+  if (realIp) return realIp;
+  return "unknown";
+}
+
 function buildFallback(portal_id: string, module_id: string) {
   return {
     version: "1.2" as const,
@@ -103,6 +126,24 @@ function extractTextFromResponse(response: { candidates?: Array<{ content?: { pa
 }
 
 export async function POST(req: Request) {
+  if (ratelimit) {
+    const ip = getClientIp(req);
+    const { success, limit, remaining, reset } = await ratelimit.limit(ip);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": String(limit),
+            "X-RateLimit-Remaining": String(remaining),
+            "X-RateLimit-Reset": String(reset),
+          },
+        }
+      );
+    }
+  }
+
   const project = process.env.GOOGLE_CLOUD_PROJECT;
   if (!project || project.trim() === "") {
     console.log(JSON.stringify({ oracle_provider: "vertex", has_project: false }));
@@ -132,6 +173,12 @@ export async function POST(req: Request) {
     body = {};
   }
   const prompt = typeof body.prompt === "string" ? body.prompt : "";
+  if (prompt.length > 500) {
+    return NextResponse.json(
+      { error: "prompt is too long (max 500 characters)" },
+      { status: 400 }
+    );
+  }
   const portal_id = typeof body.portal_id === "string" ? body.portal_id : "comprendre";
   const module_id = typeof body.module_id === "string" ? body.module_id : "vibe-check";
 

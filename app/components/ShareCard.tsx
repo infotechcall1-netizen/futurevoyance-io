@@ -1,6 +1,6 @@
 "use client";
 
-type PortalId = "comprendre" | "aimer" | "prevoir" | "recevoir";
+import type { PortalId } from "@/lib/oracle/schema";
 
 const PORTAL_LABELS: Record<PortalId, string> = {
   comprendre: "COMPRENDRE",

@@ -56,3 +56,4 @@ export const oracleResponseSchema = z.object({
 });
 
 export type OracleResponse = z.infer<typeof oracleResponseSchema>;
+export type PortalId = z.infer<typeof portalIdSchema>;
