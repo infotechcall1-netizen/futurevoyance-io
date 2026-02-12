@@ -12,6 +12,7 @@ export async function GET(req: Request, ctx: unknown) {
   try {
     return await getHandler()(req, ctx as never);
   } catch (err) {
+    console.error("[auth] email signin failed", err);
     const message = err instanceof Error ? err.message : "Auth configuration error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -21,6 +22,7 @@ export async function POST(req: Request, ctx: unknown) {
   try {
     return await getHandler()(req, ctx as never);
   } catch (err) {
+    console.error("[auth] email signin failed", err);
     const message = err instanceof Error ? err.message : "Auth configuration error";
     return NextResponse.json({ error: message }, { status: 500 });
   }

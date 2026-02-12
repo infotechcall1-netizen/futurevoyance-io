@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 type LoginPageProps = {
-  searchParams: Promise<{ callbackUrl?: string; check?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; check?: string; error?: string }>;
 };
 
 function safeCallbackUrl(input?: string): string {
@@ -22,6 +22,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const callbackUrl = safeCallbackUrl(params.callbackUrl);
   const showCheckMessage = params.check === "1";
+  const showSigninError = params.error === "EmailSignin";
 
   const session = await getServerAuthSession();
   if (session?.user?.email) {
@@ -39,7 +40,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       {showCheckMessage && (
         <p className="rounded-xl border border-emerald-500/30 bg-emerald-950/30 px-3 py-2 text-sm text-emerald-200">
-          Verifie ta boite mail et clique sur le lien de connexion.
+          Lien envoye. Verifie ta boite mail et clique sur le lien de connexion.
+        </p>
+      )}
+      {showSigninError && (
+        <p className="rounded-xl border border-rose-500/30 bg-rose-950/30 px-3 py-2 text-sm text-rose-200">
+          Erreur d&apos;envoi du lien magique, reessaie dans un instant.
         </p>
       )}
 

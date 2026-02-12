@@ -23,6 +23,7 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
       await signIn("email", {
         email: value,
         callbackUrl,
+        redirect: true,
       });
     } catch {
       setError("Impossible d'envoyer le lien magique.");
