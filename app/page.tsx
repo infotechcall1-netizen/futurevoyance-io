@@ -22,97 +22,98 @@ export default function Home() {
   const dayOracle = oracleOfDay(now);
 
   return (
-    <div className="space-y-14">
+    <div className="space-y-32">
       <ViewEvent name="view_oracle_home" />
+      
       {/* Hero */}
-      <section className="space-y-6">
-        <p className="text-xs font-medium uppercase tracking-[0.25em] text-violet-200/80">
-          Oracle IA • FutureVoyance
-        </p>
-        <h1 className="text-balance text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
-          Ton Oracle personnel, relié à{" "}
-          <span className="bg-gradient-to-r from-violet-300 via-fuchsia-200 to-amber-200 bg-clip-text text-transparent">
-            ton énergie du moment
+      <section className="relative py-32 md:py-40">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden opacity-[0.02]">
+          <span className="font-[family-name:var(--font-playfair)] text-[20vw] font-bold leading-none tracking-tighter text-gray-400">
+            ORACLE
           </span>
-          .
-        </h1>
-        <p className="max-w-2xl text-base text-slate-300/90">
-          Une IA ésotérique qui se souvient de tes dates, de tes cycles et de
-          tes rituels pour t&apos;offrir un message juste, au bon moment.
-        </p>
-        <div className="flex flex-wrap items-center gap-3 pt-1">
-          <button className="rounded-full bg-violet-500 px-6 py-2.5 text-sm font-medium text-slate-50 shadow-[0_0_40px_rgba(139,92,246,0.6)] transition hover:bg-violet-400">
-            Recevoir le message du jour
-          </button>
-          <button className="rounded-full border border-violet-300/50 bg-transparent px-6 py-2.5 text-sm font-medium text-violet-100 transition hover:border-violet-200 hover:bg-violet-500/10">
-            Activer mon Oracle
-          </button>
         </div>
+        
+        <div className="relative mx-auto max-w-4xl space-y-16 text-center">
+          <div className="space-y-8">
+            <p className="text-xs font-medium uppercase tracking-[0.35em] text-[#C9A961]">
+              FutureVoyance
+            </p>
+            <h1 className="font-[family-name:var(--font-playfair)] text-6xl font-semibold leading-[1.08] tracking-tight text-[#1A1A1A] md:text-7xl lg:text-8xl">
+              L'Oracle qui{" "}
+              <span className="italic text-[#7C3AED]">révèle</span>
+            </h1>
+          </div>
+          
+          <div className="mx-auto max-w-xl">
+            <a
+              href="#oracle-chat"
+              className="group inline-flex items-center gap-2 rounded-sm bg-[#7C3AED] px-12 py-5 text-base font-medium text-white shadow-sm transition-all hover:bg-[#6D28D9]"
+            >
+              Recevoir ton message
+              <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Oracle Input */}
+      <section id="oracle-chat" className="mx-auto max-w-3xl">
         <OracleChat />
       </section>
 
+      {/* Day Oracle */}
       <OracleLive todayLabel={todayLabel} initialDayOracle={dayOracle} />
 
-      {/* Choisis une porte */}
-      <section className="space-y-4">
-        <div className="flex items-baseline justify-between gap-4">
-          <h2 className="text-lg font-semibold text-slate-50">
-            Choisis une porte
+      {/* Portals */}
+      <section className="space-y-16">
+        <div className="text-center">
+          <h2 className="font-[family-name:var(--font-playfair)] text-4xl font-semibold text-[#1A1A1A] md:text-5xl">
+            Quatre portes
           </h2>
-          <p className="text-xs text-slate-400/90">
-            Chaque porte ouvre un angle de lecture différent de ta réalité.
+          <p className="mt-4 text-sm text-[#1A1A1A]/50">
+            Chaque porte ouvre un angle différent de ta réalité
           </p>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
+        
+        <div className="grid gap-6 md:grid-cols-2">
           <PortalCard
             href="/comprendre"
             title="Comprendre"
             subtitle="Numérologie, cycles, archétypes et lignes de force de ton chemin."
+            accentColor="var(--comprendre)"
           />
           <PortalCard
             href="/aimer"
             title="Aimer"
             subtitle="Compatibilités, résonances de prénoms et signatures affectives."
+            accentColor="var(--aimer)"
           />
           <PortalCard
             href="/prevoir"
             title="Prévoir"
             subtitle="Horoscopes, périodes charnières et fenêtres d&apos;opportunité."
+            accentColor="var(--prevoir)"
           />
           <PortalCard
             href="/recevoir"
             title="Recevoir"
             subtitle="Tirages intuitifs, messages symboliques et guidance en temps réel."
+            accentColor="var(--recevoir)"
           />
         </div>
       </section>
 
-      {/* Un Oracle qui se souvient */}
-      <section className="space-y-4 rounded-3xl border border-slate-700/70 bg-slate-950/60 p-6">
-        <h2 className="text-lg font-semibold text-slate-50">
+      {/* Memory */}
+      <section className="mx-auto max-w-2xl space-y-6 border-t border-[#1A1A1A]/10 py-20 text-center">
+        <h3 className="font-[family-name:var(--font-playfair)] text-2xl font-medium text-[#1A1A1A]">
           Un Oracle qui se souvient
-        </h2>
-        <ul className="space-y-2 text-sm text-slate-300/90">
-          <li>• Garde en mémoire tes dates clés, tes tirages et tes décisions.</li>
-          <li>• Relie tes événements à des cycles numérologiques et astrologiques.</li>
-          <li>• Met en lumière les motifs récurrents pour t&apos;aider à choisir en conscience.</li>
-        </ul>
-      </section>
-
-      {/* CTA final */}
-      <section className="border-t border-slate-800 pt-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-100">
-              Prêt·e à recevoir un premier signe ?
-            </p>
-            <p className="text-xs text-slate-400/90">
-              L&apos;Oracle IA ne prédit pas, il révèle ce qui cherche déjà à se montrer.
-            </p>
-          </div>
-          <button className="rounded-full bg-violet-500 px-6 py-2.5 text-sm font-medium text-slate-50 shadow-[0_0_40px_rgba(139,92,246,0.6)] transition hover:bg-violet-400">
-            Ouvrir mon premier message
-          </button>
+        </h3>
+        <div className="space-y-3 text-sm leading-relaxed text-[#1A1A1A]/60">
+          <p>Garde en mémoire tes dates clés, tes tirages et tes décisions.</p>
+          <p>Relie tes événements à des cycles numérologiques et astrologiques.</p>
+          <p>Met en lumière les motifs récurrents pour t'aider à choisir en conscience.</p>
         </div>
       </section>
     </div>

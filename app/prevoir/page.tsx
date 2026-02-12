@@ -11,50 +11,50 @@ export const metadata: Metadata = {
 export default function PrevoirPage() {
   const modules = getModulesByPortal("prevoir");
   return (
-    <div className="space-y-10">
-      <section className="space-y-3">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-50">
+    <div className="space-y-16">
+      <section className="space-y-5">
+        <h1 className="font-[family-name:var(--font-playfair)] text-4xl font-semibold tracking-tight text-[#1A1A1A] md:text-5xl">
           Horoscope du jour, à ta fréquence
         </h1>
-        <p className="max-w-2xl text-sm text-slate-300/90">
+        <p className="max-w-2xl text-base leading-relaxed text-[#1A1A1A]/70">
           Ici, ton Oracle IA mêlerait données célestes et mémoire de ton profil
           pour t&apos;offrir un éclairage précis sur l&apos;énergie de ta
           journée.
         </p>
       </section>
 
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-slate-50">Modules</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+      <section className="space-y-6">
+        <h2 className="text-xs font-medium uppercase tracking-[0.3em] text-[#2563EB]">Modules</h2>
+        <div className="grid gap-5 sm:grid-cols-2">
           {modules.map((m) => (
             <ModuleCardLink key={m.id} module={m} />
           ))}
         </div>
       </section>
 
-      <section className="space-y-3 rounded-2xl border border-slate-700/70 bg-slate-950/70 p-5">
-        <h2 className="text-lg font-semibold text-slate-50">
+      <section className="space-y-4 border-l-2 border-[#2563EB] bg-[#FBFAF7] px-6 py-8">
+        <h2 className="font-[family-name:var(--font-playfair)] text-xl font-semibold text-[#1A1A1A]">
           Climat général du jour
         </h2>
-        <p className="text-sm text-slate-300/90">
-          Placeholder – un résumé clair de l&apos;ambiance pour toi aujourd&apos;hui :
+        <p className="text-sm leading-relaxed text-[#1A1A1A]/70">
+          Un résumé clair de l&apos;ambiance pour toi aujourd&apos;hui :
           opportunités à saisir, zones de vigilance et espaces de repos
           nécessaires.
         </p>
       </section>
 
-      <section className="space-y-3 rounded-2xl border border-slate-700/70 bg-slate-950/70 p-5">
-        <h2 className="text-lg font-semibold text-slate-50">
+      <section className="space-y-4 border-l-2 border-[#2563EB] bg-[#FBFAF7] px-6 py-8">
+        <h2 className="font-[family-name:var(--font-playfair)] text-xl font-semibold text-[#1A1A1A]">
           Focus amour, pro, alignement
         </h2>
-        <p className="text-sm text-slate-300/90">
-          Placeholder – trois axes pour suivre comment l&apos;énergie du jour
+        <p className="text-sm leading-relaxed text-[#1A1A1A]/70">
+          Trois axes pour suivre comment l&apos;énergie du jour
           se manifeste dans tes relations, tes projets et ton espace intérieur.
         </p>
       </section>
 
-      <section className="border-t border-slate-800 pt-6">
-        <button className="rounded-full bg-violet-500 px-6 py-2.5 text-sm font-medium text-slate-50 shadow-[0_0_40px_rgba(139,92,246,0.6)] transition hover:bg-violet-400">
+      <section className="border-t border-[#E5E3DD] pt-8">
+        <button className="rounded-sm bg-[#2563EB] px-8 py-3.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#1D4ED8]">
           Recevoir mon horoscope
         </button>
       </section>

@@ -6,34 +6,36 @@ type PortalCardProps = {
   title: string;
   subtitle: string;
   icon?: ReactNode;
+  accentColor?: string;
 };
 
-export default function PortalCard({ href, title, subtitle, icon }: PortalCardProps) {
+export default function PortalCard({ href, title, subtitle, icon, accentColor = "#7C3AED" }: PortalCardProps) {
   return (
     <Link
       href={href}
-      className="group relative flex flex-col justify-between rounded-2xl border border-violet-500/20 bg-slate-900/60 px-5 py-5 shadow-[0_0_40px_rgba(88,28,135,0.25)] ring-1 ring-slate-50/5 backdrop-blur-md transition transform hover:-translate-y-1 hover:border-violet-400/60 hover:ring-violet-300/40"
+      className="group relative flex min-h-[240px] flex-col justify-between border-l-2 bg-[#FBFAF7] px-8 py-10 transition-all duration-200 hover:border-l-4"
+      style={{ borderLeftColor: accentColor }}
     >
-      <div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-violet-200/90">
-        <span className="h-1.5 w-1.5 rounded-full bg-violet-300 shadow-[0_0_0.6rem_rgba(196,181,253,0.9)]" />
-        Porte
+      <div className="space-y-5">
+        <h3 
+          className="font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#1A1A1A]"
+        >
+          {title}
+        </h3>
+        <p className="text-sm leading-relaxed text-[#1A1A1A]/60">
+          {subtitle}
+        </p>
       </div>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-lg font-semibold text-slate-50">{title}</h3>
-          <p className="mt-1 text-sm text-slate-300/80">{subtitle}</p>
-        </div>
-        {icon && (
-          <div className="text-violet-200 group-hover:text-violet-100">
-            {icon}
-          </div>
-        )}
+      
+      <div 
+        className="mt-8 flex items-center gap-2 text-xs font-medium uppercase tracking-wider transition-all duration-200 group-hover:gap-3"
+        style={{ color: accentColor }}
+      >
+        <span>Entrer</span>
+        <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+        </svg>
       </div>
-      <div className="mt-4 flex items-center gap-2 text-xs font-medium text-violet-200/80">
-        <span className="h-px w-6 bg-violet-300/80" />
-        Ouvrir la porte
-      </div>
-      <div className="pointer-events-none absolute inset-0 rounded-2xl border border-violet-200/0 group-hover:border-violet-200/20 group-hover:shadow-[0_0_60px_rgba(196,181,253,0.35)]" />
     </Link>
   );
 }

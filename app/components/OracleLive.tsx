@@ -59,130 +59,151 @@ export default function OracleLive({ todayLabel, initialDayOracle }: OracleLiveP
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-20">
       {/* Vibration du jour vivante */}
-      <section className="grid gap-6 rounded-3xl border border-violet-500/25 bg-slate-950/60 p-6 shadow-[0_0_80px_rgba(15,23,42,0.9)] ring-1 ring-slate-50/5 md:grid-cols-[1.1fr_1.2fr]">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-violet-200/90">
-            Vibration du jour
-          </p>
-          <p className="text-sm text-slate-300/90">{todayLabel}</p>
-          <p className="mt-4 text-3xl font-semibold text-violet-100">
-            {dayOracle.vibration} – {dayOracle.title}
-          </p>
-          <p className="text-xs font-medium uppercase tracking-[0.28em] text-violet-300/90">
-            {dayOracle.keyword}
-          </p>
+      <section className="border-l-2 border-[#7C3AED] bg-[#FBFAF7] px-8 py-12 md:grid md:grid-cols-2 md:gap-12">
+        <div className="space-y-6">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C9A961]">
+              Vibration du jour
+            </p>
+            <p className="mt-1 text-sm text-[#1A1A1A]/50">{todayLabel}</p>
+          </div>
+          
+          <div>
+            <p className="font-[family-name:var(--font-playfair)] text-4xl font-semibold leading-tight text-[#7C3AED]">
+              {dayOracle.vibration}
+            </p>
+            <p className="mt-2 text-xl text-[#1A1A1A]">{dayOracle.title}</p>
+            <p className="mt-2 text-xs uppercase tracking-[0.28em] text-[#7C3AED]/60">
+              {dayOracle.keyword}
+            </p>
+          </div>
+          
           <button
             type="button"
             onClick={handleRevealDay}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-violet-500 px-5 py-2 text-sm font-medium text-slate-50 shadow-[0_0_40px_rgba(139,92,246,0.6)] transition hover:bg-violet-400"
+            className="inline-flex items-center gap-2 rounded-sm bg-[#7C3AED] px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#6D28D9]"
           >
             <span>🔮</span>
-            <span>Révéler le message du jour</span>
+            <span>Révéler le message</span>
           </button>
         </div>
-        <div className="space-y-3 rounded-2xl border border-violet-500/20 bg-gradient-to-br from-slate-900 via-slate-950 to-violet-950/60 p-5">
-          <p className="text-xs font-medium uppercase tracking-[0.28em] text-violet-200/90">
+        
+        <div className="mt-8 space-y-4 md:mt-0">
+          <p className="text-xs font-medium uppercase tracking-[0.28em] text-[#C9A961]">
             Message de l&apos;Oracle
           </p>
           {showDayDetails ? (
             <>
-              <p className="text-sm text-slate-200/90">{dayOracle.dailyMessage}</p>
-              <div className="mt-3 rounded-xl border border-violet-500/30 bg-slate-950/60 p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-200/90">
+              <p className="text-base leading-relaxed text-[#1A1A1A]">
+                {dayOracle.dailyMessage}
+              </p>
+              <div className="mt-4 border-l-2 border-[#C9A961]/40 bg-white px-4 py-3">
+                <p className="text-xs font-medium uppercase tracking-[0.22em] text-[#C9A961]">
                   Rituel du jour
                 </p>
-                <p className="mt-1 text-xs text-slate-200/85">{dayOracle.dailyRitual}</p>
+                <p className="mt-2 text-sm text-[#1A1A1A]/80">
+                  {dayOracle.dailyRitual}
+                </p>
               </div>
             </>
           ) : (
-            <p className="text-sm text-slate-200/80">
+            <p className="text-sm leading-relaxed text-[#1A1A1A]/60">
               Ferme un instant les yeux, sens la couleur de ta journée… puis clique sur
-              « Révéler » quand tu te sens prêt·e à recevoir le message.
+              « Révéler » quand tu te sens prêt·e.
             </p>
           )}
         </div>
       </section>
 
       {/* Oracle personnel interactif */}
-      <section className="space-y-5 rounded-3xl border border-slate-700/70 bg-slate-950/60 p-6">
-        <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-slate-50">
+      <section className="space-y-10 bg-[#FBFAF7] px-8 py-16">
+        <div className="space-y-4 text-center">
+          <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-medium text-[#1A1A1A]">
             Activer ton Oracle personnel
           </h2>
-          <p className="text-sm text-slate-300/85">
+          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-[#1A1A1A]/60">
             En reliant ta date de naissance à la vibration du jour, l&apos;Oracle
             compose une lecture qui te parle directement, à ton rythme.
           </p>
         </div>
-        <div className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col text-xs text-slate-300/80">
-            Date de naissance
+        
+        <div className="mx-auto flex max-w-md flex-col items-center gap-5">
+          <label className="w-full text-center">
+            <span className="text-xs uppercase tracking-[0.3em] text-[#C9A961]">
+              Date de naissance
+            </span>
             <input
               type="date"
               value={birthDate}
               onChange={(event) => setBirthDate(event.target.value)}
-              className="mt-1 w-52 rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none ring-0 placeholder:text-slate-500 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/60"
+              className="mt-2 w-full border-b border-[#E5E3DD] bg-transparent px-2 py-3 text-center text-base text-[#1A1A1A] outline-none focus:border-[#7C3AED]"
             />
           </label>
+          
           <button
             type="button"
             onClick={handleActivatePersonal}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-violet-500 px-5 py-2.5 text-sm font-medium text-slate-50 shadow-[0_0_40px_rgba(139,92,246,0.6)] transition hover:bg-violet-400 sm:mt-6"
+            className="inline-flex items-center gap-2 rounded-sm bg-[#7C3AED] px-8 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#6D28D9]"
           >
             <span>✨</span>
             <span>Activer</span>
           </button>
+          
           {personalActivated && personalOracle && (
             <button
               type="button"
               onClick={handleRevealPersonal}
-              className="mt-4 inline-flex items-center gap-2 rounded-full border border-violet-300/60 bg-violet-500/10 px-5 py-2.5 text-sm font-medium text-violet-100 transition hover:border-violet-200 hover:bg-violet-500/20 sm:mt-6"
+              className="inline-flex items-center gap-2 rounded-sm border border-[#C9A961]/50 bg-transparent px-8 py-3 text-sm font-medium text-[#C9A961] transition-all hover:border-[#C9A961]/70"
             >
               <span>🔮</span>
-              <span>Révéler mon Oracle personnel</span>
+              <span>Révéler mon Oracle</span>
             </button>
           )}
         </div>
+        
         {birthError && (
-          <p className="text-xs text-rose-300/90">
+          <p className="text-center text-xs text-red-600">
             {birthError}
           </p>
         )}
+        
         {personalActivated && personalOracle && (
-          <div className="mt-4 space-y-3 rounded-2xl border border-violet-500/30 bg-slate-950/70 p-4">
-            <div className="flex items-baseline justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-violet-200/90">
-                  Oracle personnel du moment
-                </p>
-                <p className="mt-2 text-base font-semibold text-violet-100">
-                  {personalOracle.vibration} – {personalOracle.title}
-                </p>
-                <p className="text-[11px] font-medium uppercase tracking-[0.26em] text-violet-300/90">
-                  {personalOracle.keyword}
-                </p>
-              </div>
+          <div className="mx-auto mt-10 max-w-2xl space-y-6 border-t border-[#E5E3DD] pt-10">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-[#C9A961]">
+                Oracle personnel
+              </p>
+              <p className="mt-3 font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#7C3AED]">
+                {personalOracle.vibration}
+              </p>
+              <p className="mt-1 text-lg text-[#1A1A1A]">
+                {personalOracle.title}
+              </p>
+              <p className="mt-1 text-xs uppercase tracking-[0.28em] text-[#7C3AED]/60">
+                {personalOracle.keyword}
+              </p>
             </div>
+            
             {showPersonalDetails ? (
               <>
-                <p className="text-sm text-slate-200/90">
+                <p className="text-base leading-relaxed text-[#1A1A1A]">
                   {personalOracle.personalMessage}
                 </p>
-                <div className="mt-3 rounded-xl border border-violet-500/30 bg-slate-950/60 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-200/90">
+                <div className="border-l-2 border-[#C9A961]/40 bg-white px-4 py-3">
+                  <p className="text-xs font-medium uppercase tracking-[0.22em] text-[#C9A961]">
                     Rituel à ancrer
                   </p>
-                  <p className="mt-1 text-xs text-slate-200/85">
+                  <p className="mt-2 text-sm text-[#1A1A1A]/80">
                     {personalOracle.personalRitual}
                   </p>
                 </div>
               </>
             ) : (
-              <p className="text-sm text-slate-200/80">
+              <p className="text-sm leading-relaxed text-[#1A1A1A]/60">
                 Respire profondément trois fois, centre-toi sur ton année à venir,
-                puis clique sur « Révéler » quand tu te sens aligné·e avec la réponse.
+                puis clique sur « Révéler » quand tu te sens aligné·e.
               </p>
             )}
           </div>

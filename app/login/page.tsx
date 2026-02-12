@@ -30,30 +30,30 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="mx-auto max-w-md space-y-6 rounded-2xl border border-slate-700/70 bg-slate-950/70 p-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold text-slate-50">Se connecter</h1>
-        <p className="text-sm text-slate-300/90">
-          Recois un lien magique par email pour acceder a ton espace Oracle.
+    <div className="mx-auto max-w-md space-y-8 border-l-2 border-[#7C3AED] bg-[#FBFAF7] px-8 py-10">
+      <div className="space-y-3">
+        <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#1A1A1A]">Se connecter</h1>
+        <p className="text-sm leading-relaxed text-[#1A1A1A]/70">
+          Reçois un lien magique par email pour accéder à ton espace Oracle.
         </p>
       </div>
 
       {showCheckMessage && (
-        <p className="rounded-xl border border-emerald-500/30 bg-emerald-950/30 px-3 py-2 text-sm text-emerald-200">
-          Lien envoye. Verifie ta boite mail et clique sur le lien de connexion.
+        <p className="rounded-sm border border-emerald-600/30 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          Lien envoyé. Vérifie ta boîte mail et clique sur le lien de connexion.
         </p>
       )}
       {showSigninError && (
-        <p className="rounded-xl border border-rose-500/30 bg-rose-950/30 px-3 py-2 text-sm text-rose-200">
-          Erreur d&apos;envoi du lien magique, reessaie dans un instant.
+        <p className="rounded-sm border border-rose-600/30 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+          Erreur d&apos;envoi du lien magique, réessaie dans un instant.
         </p>
       )}
 
       <LoginForm callbackUrl={callbackUrl} />
 
-      <p className="text-xs text-slate-400">
-        <Link href="/" className="underline hover:text-slate-300">
-          Retour a l&apos;accueil
+      <p className="text-xs text-[#1A1A1A]/50">
+        <Link href="/" className="underline decoration-[#7C3AED]/40 underline-offset-4 hover:text-[#1A1A1A]">
+          Retour à l&apos;accueil
         </Link>
       </p>
     </div>

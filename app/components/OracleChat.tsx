@@ -18,6 +18,11 @@ type OracleContent = {
   lecture: string[];
   action: string;
   share_card_text: string;
+  archetype?: string;
+  ombre?: string;
+  initiation?: string;
+  transmutation?: string;
+  rituel?: string;
 };
 
 type OracleChatProps = {
@@ -79,6 +84,11 @@ export default function OracleChat({
           lecture: Array.isArray(data.content.lecture) ? data.content.lecture : [],
           action: data.content.action ?? "",
           share_card_text: data.content.share_card_text ?? "",
+          archetype: data.content.archetype,
+          ombre: data.content.ombre,
+          initiation: data.content.initiation,
+          transmutation: data.content.transmutation,
+          rituel: data.content.rituel,
         });
         if (data?.safety && data.safety.category !== "none") {
           setSafety({
@@ -122,51 +132,64 @@ export default function OracleChat({
   }
 
   return (
-    <section className="space-y-4 rounded-2xl border border-violet-500/20 bg-slate-900/50 p-5">
-      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-200/90">
-        Interroger l&apos;Oracle
-      </h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <section className="space-y-10 bg-[#FBFAF7] px-8 py-16 md:px-16 md:py-20">
+      <div className="text-center">
+        <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-medium text-[#1A1A1A] md:text-4xl">
+          Pose ta question
+        </h2>
+        <p className="mt-3 text-sm text-[#1A1A1A]/50">
+          L'Oracle écoute
+        </p>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-8">
         {!lockPortal && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap justify-center gap-3">
             {PORTALS.map((p) => (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => setPortalId(p.id)}
-                className={`rounded-full px-4 py-2 text-xs font-medium transition ${portalId === p.id
-                  ? "bg-violet-500 text-slate-50"
-                  : "border border-violet-500/40 bg-transparent text-violet-200/90 hover:bg-violet-500/20"
-                  }`}
+                className={`rounded-sm px-5 py-2.5 text-sm font-medium transition-all ${
+                  portalId === p.id
+                    ? "bg-[#7C3AED] text-white"
+                    : "border border-[#E5E3DD] bg-transparent text-[#1A1A1A]/70 hover:border-[#1A1A1A]/30 hover:text-[#1A1A1A]"
+                }`}
               >
                 {p.label}
               </button>
             ))}
           </div>
         )}
-        <div className="flex gap-2">
+        
+        <div className="relative">
           <input
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Pose ta question ou décris ton intention..."
-            className="min-w-0 flex-1 rounded-xl border border-slate-600 bg-slate-900/80 px-4 py-2.5 text-sm text-slate-50 placeholder:text-slate-500 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40"
+            placeholder="Écris ton intention..."
+            className="w-full border-b border-[#E5E3DD] bg-transparent px-2 py-6 text-center text-lg text-[#1A1A1A] placeholder:text-[#1A1A1A]/30 focus:border-[#7C3AED] focus:outline-none"
             disabled={loading}
           />
+        </div>
+        
+        <div className="text-center">
           <button
             type="submit"
             disabled={!canSubmit}
-            className="rounded-xl bg-violet-500 px-5 py-2.5 text-sm font-medium text-slate-50 transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-sm bg-[#7C3AED] px-10 py-4 text-base font-medium text-white shadow-sm transition-all hover:bg-[#6D28D9] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {loading ? "..." : "Envoyer"}
+            {loading ? "Consultation en cours..." : "Consulter"}
           </button>
         </div>
       </form>
+      
       {error && (
-        <p className="text-sm text-rose-300/90">{error}</p>
+        <p className="text-center text-sm text-red-600">{error}</p>
       )}
+      
       {content && (
-        <div className="space-y-4 border-t border-slate-700/70 pt-4">
+        <div className="mx-auto max-w-2xl space-y-8 border-t border-[#E5E3DD] pt-12">
           {safety && (
             <SafetyBanner
               category={safety.category}
@@ -174,29 +197,72 @@ export default function OracleChat({
               referralText={safety.referral_text}
             />
           )}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-200/80">
-              Essentiel
-            </p>
-            <p className="mt-1 text-sm text-slate-200/95">{content.essentiel}</p>
+          
+          {content.archetype && content.ombre && content.initiation && content.transmutation && content.rituel && (
+            <div className="rounded-sm border border-indigo-200/40 bg-gradient-to-br from-slate-50 to-indigo-50/30 p-6 shadow-sm">
+              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.35em] text-indigo-900/70">
+                Lecture initiatique
+              </p>
+              <div className="space-y-4 text-sm leading-relaxed">
+                <div>
+                  <span className="font-medium text-indigo-900">Archétype :</span>
+                  <span className="ml-2 text-slate-700">{content.archetype}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-indigo-900">Ombre :</span>
+                  <span className="ml-2 text-slate-700">{content.ombre}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-indigo-900">Initiation :</span>
+                  <span className="ml-2 text-slate-700">{content.initiation}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-indigo-900">Transmutation :</span>
+                  <span className="ml-2 text-slate-700">{content.transmutation}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-amber-800">Rituel :</span>
+                  <span className="ml-2 text-slate-700">{content.rituel}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div className="space-y-8">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C9A961]">
+                Essentiel
+              </p>
+              <p className="mt-4 text-base leading-relaxed text-[#1A1A1A]">
+                {content.essentiel}
+              </p>
+            </div>
+            
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C9A961]">
+                Lecture
+              </p>
+              <ul className="mt-4 space-y-3 text-sm leading-relaxed text-[#1A1A1A]/80">
+                {content.lecture.map((item, i) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="text-[#7C3AED]">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C9A961]">
+                Action
+              </p>
+              <p className="mt-4 text-base leading-relaxed text-[#1A1A1A]">
+                {content.action}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-200/80">
-              Lecture
-            </p>
-            <ul className="mt-1 list-inside list-disc space-y-1 text-sm text-slate-200/95">
-              {content.lecture.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-200/80">
-              Action
-            </p>
-            <p className="mt-1 text-sm text-slate-200/95">{content.action}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          
+          <div className="flex justify-center pt-6">
             <button
               type="button"
               onClick={async () => {
@@ -217,11 +283,12 @@ export default function OracleChat({
                   }
                 }
               }}
-              className="rounded-xl border border-violet-500/40 bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-100 transition hover:bg-violet-500/20"
+              className="rounded-sm border border-[#C9A961]/40 bg-transparent px-6 py-3 text-sm font-medium text-[#C9A961] transition-all hover:border-[#C9A961]/60"
             >
               Télécharger ma carte
             </button>
           </div>
+          
           <div
             ref={shareCardRef}
             className="pointer-events-none absolute left-[-9999px] top-0"
@@ -230,16 +297,17 @@ export default function OracleChat({
             <ShareCard
               text={content.share_card_text}
               portalId={portalId}
+              vibe={content.archetype}
             />
           </div>
         </div>
       )}
       {isDev && rawJson && (
-        <details className="border-t border-slate-700/70 pt-3">
-          <summary className="cursor-pointer text-xs text-slate-400 hover:text-slate-300">
+        <details className="border-t border-[#E5E3DD] pt-3">
+          <summary className="cursor-pointer text-xs text-[#1A1A1A]/50 hover:text-[#1A1A1A]">
             Debug (réponse JSON)
           </summary>
-          <pre className="mt-2 max-h-64 overflow-auto rounded-lg bg-slate-950/80 p-3 text-[11px] text-slate-300/90">
+          <pre className="mt-2 max-h-64 overflow-auto rounded-sm border border-[#E5E3DD] bg-white p-3 text-[11px] text-[#1A1A1A]/80">
             {rawJson}
           </pre>
         </details>

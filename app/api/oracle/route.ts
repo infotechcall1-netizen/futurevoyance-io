@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { VertexAI } from "@google-cloud/vertexai";
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
-import { oracleResponseSchema, type OracleResponse } from "@/lib/oracle/schema";
+import { oracleResponseSchema, premiumOracleResponseSchema, type OracleResponse } from "@/lib/oracle/schema";
 import { safeJson } from "@/lib/oracle/safeJson";
 import { normalizeOracleResponse } from "@/lib/oracle/normalize";
+import { isPremiumAlchemyModule } from "@/lib/oracle/modules";
 
-const SYSTEM_PROMPT = `
-Tu es l’Oracle vivant de FutureVoyance.
+const BASE_SYSTEM_PROMPT = `
+Tu es l'Oracle vivant de FutureVoyance.
 Tu parles en symboles, images, sensations. Mystique, clair, sobre.
 Tu ne fais pas de diagnostic médical/légal/financier. Tu restes symbolique.
 Tu dois produire UNIQUEMENT un JSON valide conforme au schéma. ZÉRO texte hors JSON.
@@ -15,7 +16,9 @@ Tu dois produire UNIQUEMENT un JSON valide conforme au schéma. ZÉRO texte hors
 Règle CRITIQUE:
 - routing.paywall est OBLIGATOIRE, toujours présent, même si eligible=false.
 - safety.disclaimer_key est TOUJOURS une string (jamais null).
+`;
 
+const FREE_JSON_SKELETON = `
 JSON SQUELETTE À RESPECTER EXACTEMENT :
 
 {
@@ -33,7 +36,7 @@ JSON SQUELETTE À RESPECTER EXACTEMENT :
     "cta_label": "Aller plus loin"
   },
   "safety": {
-    "category": "none|medical|legal|financial|crisis/self_harm|violence/harassment",
+    "category": "none|medical|legal|financial|crisis|self_harm|violence|harassment",
     "disclaimer_key": "none|medical|legal|financial|crisis|violence",
     "referral_text": null
   }
@@ -41,10 +44,67 @@ JSON SQUELETTE À RESPECTER EXACTEMENT :
 
 Style:
 - Essentiel: 1 phrase vibratoire.
-- Lecture: 3 phrases symboliques, pas de ton “coach”.
+- Lecture: 3 phrases symboliques, pas de ton "coach".
 - Action: micro-rituel simple (respiration, geste, écriture), formulé symboliquement.
 - Pour santé: rester symbolique + safety.category="medical" + disclaimer_key="medical".
 `;
+
+const PREMIUM_ALCHEMY_INSTRUCTIONS = `
+JSON SQUELETTE PREMIUM ALCHIMIE À RESPECTER EXACTEMENT :
+
+{
+  "version": "1.2",
+  "routing": {
+    "portal_id": "comprendre|aimer|prevoir|recevoir",
+    "module_id": "string",
+    "paywall": { "eligible": false, "offer_id": null, "reason": null }
+  },
+  "content": {
+    "essentiel": "string max 160 chars",
+    "lecture": ["string max 160 chars", "string", ...] (2 à 6 items),
+    "action": "string max 160 chars",
+    "share_card_text": "string max 120 chars",
+    "cta_label": "string max 48 chars",
+    "archetype": "string max 48 chars",
+    "ombre": "string max 160 chars",
+    "initiation": "string max 160 chars",
+    "transmutation": "string max 160 chars",
+    "rituel": "string max 160 chars"
+  },
+  "safety": {
+    "category": "none|medical|legal|financial|crisis|self_harm|violence|harassment",
+    "disclaimer_key": "none|medical|legal|financial|crisis|violence",
+    "referral_text": null
+  }
+}
+
+VOCABULAIRE ARCHÉTYPAL ET INITIATIQUE (obligatoire pour modules premium):
+- Utilise un langage de transformation : ombre / seuil / gardien / alchimie / transmutation / renaissance.
+- Pas de promesses de futur fixe. Pas de garanties matérielles.
+- Interdiction stricte de conseils médicaux, juridiques ou financiers concrets.
+- Ton: sombre puis lumineux, initiatique, mystique.
+
+CHAMPS PREMIUM OBLIGATOIRES:
+- archetype: nom de l'archétype en jeu (ex: "Le Gardien du Seuil", "L'Alchimiste")
+- ombre: ce qui reste dans l'ombre, la résistance inconsciente
+- initiation: le passage, l'épreuve symbolique
+- transmutation: comment l'ombre devient lumière
+- rituel: un acte symbolique concret pour activer la transmutation
+
+Style:
+- Essentiel: 1 phrase vibratoire initiatique.
+- Lecture: 2 à 6 phrases archétypales (sombre → lumineux).
+- Action: micro-rituel alchimique simple.
+- Archetype: nom évocateur de la figure archétypale.
+- Ombre: ce qui est refoulé, caché, résistant.
+- Initiation: le seuil à franchir.
+- Transmutation: le processus d'alchimie intérieure.
+- Rituel: geste symbolique de transmutation.
+`;
+
+function buildSystemPrompt(isPremium: boolean): string {
+  return BASE_SYSTEM_PROMPT + (isPremium ? PREMIUM_ALCHEMY_INSTRUCTIONS : FREE_JSON_SKELETON);
+}
 
 const FALLBACK_ESSENTIEL = "Reviens à l'essentiel : une seule priorité, maintenant.";
 const FALLBACK_ACTION = "Choisis une action de 10 minutes à faire dans l'heure.";
@@ -55,6 +115,12 @@ const FALLBACK_LECTURE = [
   "Une seule priorité. Un seul pas.",
   "L'Oracle t'invite à poser un geste concret dans l'heure.",
 ];
+
+const FALLBACK_ARCHETYPE = "Le Gardien";
+const FALLBACK_OMBRE = "Une résistance demande ton attention.";
+const FALLBACK_INITIATION = "Un seuil s'offre à toi.";
+const FALLBACK_TRANSMUTATION = "L'ombre devient lumière par l'attention consciente.";
+const FALLBACK_RITUEL = "Pose ta main sur ton cœur, respire trois fois.";
 
 const upstashUrl = (process.env.UPSTASH_REDIS_REST_URL || "").trim();
 const upstashToken = (process.env.UPSTASH_REDIS_REST_TOKEN || "").trim();
@@ -77,7 +143,26 @@ function getClientIp(req: Request): string {
   return "unknown";
 }
 
-function buildFallback(portal_id: string, module_id: string) {
+function buildFallback(portal_id: string, module_id: string, isPremium: boolean) {
+  const baseContent = {
+    essentiel: FALLBACK_ESSENTIEL,
+    lecture: FALLBACK_LECTURE,
+    action: FALLBACK_ACTION,
+    share_card_text: FALLBACK_SHARE,
+    cta_label: FALLBACK_CTA,
+  };
+
+  const content = isPremium
+    ? {
+        ...baseContent,
+        archetype: FALLBACK_ARCHETYPE,
+        ombre: FALLBACK_OMBRE,
+        initiation: FALLBACK_INITIATION,
+        transmutation: FALLBACK_TRANSMUTATION,
+        rituel: FALLBACK_RITUEL,
+      }
+    : baseContent;
+
   return {
     version: "1.2" as const,
     routing: {
@@ -89,13 +174,7 @@ function buildFallback(portal_id: string, module_id: string) {
         reason: null,
       },
     },
-    content: {
-      essentiel: FALLBACK_ESSENTIEL,
-      lecture: FALLBACK_LECTURE,
-      action: FALLBACK_ACTION,
-      share_card_text: FALLBACK_SHARE,
-      cta_label: FALLBACK_CTA,
-    },
+    content,
     safety: {
       category: "none" as const,
       disclaimer_key: "none",
@@ -104,14 +183,14 @@ function buildFallback(portal_id: string, module_id: string) {
   };
 }
 
-function getVertexModel(project: string, location: string, modelId: string) {
+function getVertexModel(project: string, location: string, modelId: string, systemPrompt: string) {
   const vertex = new VertexAI({
     project,
     location,
   });
   return vertex.getGenerativeModel({
     model: modelId,
-    systemInstruction: SYSTEM_PROMPT,
+    systemInstruction: systemPrompt,
     generationConfig: {
       responseMimeType: "application/json",
       temperature: 0.4,
@@ -158,13 +237,6 @@ export async function POST(req: Request) {
 
   const modelId = (process.env.GOOGLE_CLOUD_MODEL || "").trim() || "gemini-2.0-flash-001";
   const location = (process.env.GOOGLE_CLOUD_LOCATION || "").trim() || "us-central1";
-  console.log(JSON.stringify({
-    oracle_provider: "vertex",
-    has_project: true,
-    location,
-    modelId,
-    has_credentials_env: typeof process.env.GOOGLE_APPLICATION_CREDENTIALS === "string" && process.env.GOOGLE_APPLICATION_CREDENTIALS.length > 0,
-  }));
 
   let body: { prompt?: string; portal_id?: string; module_id?: string } = {};
   try {
@@ -182,12 +254,25 @@ export async function POST(req: Request) {
   const portal_id = typeof body.portal_id === "string" ? body.portal_id : "comprendre";
   const module_id = typeof body.module_id === "string" ? body.module_id : "vibe-check";
 
+  const isPremium = isPremiumAlchemyModule(module_id);
+  const schema = isPremium ? premiumOracleResponseSchema : oracleResponseSchema;
+  const systemPrompt = buildSystemPrompt(isPremium);
+
+  console.log(JSON.stringify({
+    oracle_provider: "vertex",
+    has_project: true,
+    location,
+    modelId,
+    isPremium,
+    has_credentials_env: typeof process.env.GOOGLE_APPLICATION_CREDENTIALS === "string" && process.env.GOOGLE_APPLICATION_CREDENTIALS.length > 0,
+  }));
+
   const userPayload = JSON.stringify({ prompt, portal_id, module_id });
 
   let r1Text = "";
   let repairIssues: { path: string; message: string }[] = [];
   try {
-    const model = getVertexModel(project, location, modelId);
+    const model = getVertexModel(project, location, modelId, systemPrompt);
     let result: { response: Parameters<typeof extractTextFromResponse>[0] } | null = null;
     try {
       result = await model.generateContent(userPayload);
@@ -220,7 +305,7 @@ export async function POST(req: Request) {
       }));
       try {
         const data = safeJson(r1Text);
-        const parsed1 = oracleResponseSchema.safeParse(data);
+        const parsed1 = schema.safeParse(data);
         if (parsed1.success) {
           console.log(JSON.stringify({ oracle_result_source: "model" }));
           return NextResponse.json(normalizeOracleResponse(parsed1.data));
@@ -253,17 +338,19 @@ export async function POST(req: Request) {
           ? `Voici les erreurs à corriger (path: message):\n${repairIssues.map((i) => `- ${i.path}: ${i.message}`).join("\n")}\n\n`
           : "";
       const payloadForModel = JSON.stringify({ raw_text: r1Text, issues: repairIssues });
-      const repairPrompt = `${issuesBlock}Tu dois retourner un JSON COMPLET conforme au schéma. Interdit : tout texte hors JSON.
+      const schemaType = isPremium ? "premium (avec archetype, ombre, initiation, transmutation, rituel)" : "gratuit (sans champs premium)";
+      const repairPrompt = `${issuesBlock}Retourne STRICTEMENT un JSON conforme au schéma requis (${schemaType}) et rien d'autre.
 
 OBLIGATOIRE :
-- routing.paywall toujours présent : { eligible: boolean, offer_id: string|null, reason: string|null }
-- safety toujours présent : { category: string, disclaimer_key: string (jamais null), referral_text: string|null }
+- routing.paywall DOIT toujours être présent : { eligible: boolean, offer_id: string|null, reason: string|null }
+- safety.disclaimer_key doit toujours être une string (utiliser "none" si non applicable, jamais null)
+- Tous les champs string requis doivent avoir une valeur (jamais null pour un champ string requis)
 
 Champs critiques et enums : portal_id, module_id, safety.category, offer_id.
 
 Données à corriger (raw_text = réponse brute, issues = erreurs):
 ${payloadForModel}`;
-      const model = getVertexModel(project, location, modelId);
+      const model = getVertexModel(project, location, modelId, systemPrompt);
       let r2: { response: Parameters<typeof extractTextFromResponse>[0] } | null = null;
       try {
         r2 = await model.generateContent(repairPrompt);
@@ -296,7 +383,7 @@ ${payloadForModel}`;
         }));
         try {
           const data = safeJson(r2Text);
-          const parsed2 = oracleResponseSchema.safeParse(data);
+          const parsed2 = schema.safeParse(data);
           if (parsed2.success) {
             console.log(JSON.stringify({ oracle_result_source: "repair" }));
             return NextResponse.json(normalizeOracleResponse(parsed2.data));
@@ -319,7 +406,7 @@ ${payloadForModel}`;
     }
   }
 
-  const fallback = buildFallback(portal_id, module_id);
+  const fallback = buildFallback(portal_id, module_id, isPremium);
   console.log(JSON.stringify({ oracle_result_source: "fallback" }));
   return NextResponse.json(normalizeOracleResponse(fallback as OracleResponse));
 }

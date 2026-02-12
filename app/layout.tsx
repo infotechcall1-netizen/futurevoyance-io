@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import Analytics from "./components/Analytics";
-import OracleHeader from "./components/OracleHeader";
+import SiteHeader from "./components/SiteHeader";
 import AuthProvider from "./components/AuthProvider";
 
 const geistSans = Geist({
@@ -13,6 +13,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -29,13 +35,13 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
         <AuthProvider>
           <Analytics />
-          <div className="min-h-screen bg-slate-950 text-slate-50">
-            <OracleHeader />
-            <main className="mx-auto max-w-5xl px-6 pb-16 pt-10">{children}</main>
+          <div className="min-h-screen text-[#1A1A1A]">
+            <SiteHeader />
+            <main className="mx-auto max-w-7xl px-6 pb-32 pt-8">{children}</main>
           </div>
         </AuthProvider>
       </body>

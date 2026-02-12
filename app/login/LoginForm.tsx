@@ -32,16 +32,16 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <label className="block space-y-1">
-        <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Email</span>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <label className="block space-y-2">
+        <span className="text-xs font-medium uppercase tracking-[0.25em] text-[#1A1A1A]/60">Email</span>
         <input
           type="email"
           name="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-xl border border-slate-600 bg-slate-900/80 px-4 py-2.5 text-sm text-slate-50 placeholder:text-slate-500 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40"
+          className="w-full border-b border-[#E5E3DD] bg-transparent px-2 py-3 text-base text-[#1A1A1A] placeholder:text-[#1A1A1A]/30 focus:border-[#7C3AED] focus:outline-none"
           placeholder="toi@email.com"
           disabled={submitting}
         />
@@ -49,11 +49,11 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-xl bg-violet-500 px-4 py-2.5 text-sm font-medium text-slate-50 transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full rounded-sm bg-[#7C3AED] px-6 py-3.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#6D28D9] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? "Envoi..." : "Envoyer le lien magique"}
       </button>
-      {error && <p className="text-sm text-rose-300/90">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </form>
   );
 }

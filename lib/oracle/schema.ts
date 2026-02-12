@@ -57,3 +57,37 @@ export const oracleResponseSchema = z.object({
 
 export type OracleResponse = z.infer<typeof oracleResponseSchema>;
 export type PortalId = z.infer<typeof portalIdSchema>;
+
+export const premiumAlchemyContentSchema = z.object({
+  essentiel: z.string().max(160),
+  lecture: z.array(z.string().max(160)).min(2).max(6),
+  action: z.string().max(160),
+  share_card_text: z.string().max(120),
+  cta_label: z.string().max(48),
+  archetype: z.string().max(48),
+  ombre: z.string().max(160),
+  initiation: z.string().max(160),
+  transmutation: z.string().max(160),
+  rituel: z.string().max(160),
+});
+
+export const premiumOracleResponseSchema = z.object({
+  version: z.literal("1.2"),
+  routing: z.object({
+    portal_id: portalIdSchema,
+    module_id: moduleIdSchema,
+    paywall: z.object({
+      eligible: z.boolean(),
+      offer_id: offerIdSchema.nullable(),
+      reason: z.string().max(200).nullable(),
+    }),
+  }),
+  content: premiumAlchemyContentSchema,
+  safety: z.object({
+    category: safetyCategorySchema,
+    disclaimer_key: z.string().max(64),
+    referral_text: z.string().max(160).nullable(),
+  }),
+});
+
+export type PremiumOracleResponse = z.infer<typeof premiumOracleResponseSchema>;

@@ -17,26 +17,26 @@ export default function Paywall({
 }: PaywallProps) {
   return (
     <section
-      className="rounded-2xl border border-amber-500/30 bg-slate-900/60 p-6"
+      className="border-l-2 border-[#C9A961] bg-[#FBFAF7] p-8"
       data-module-id={moduleId}
     >
-      <h2 className="text-lg font-semibold text-slate-50">Accès Premium</h2>
-      <p className="mt-2 text-sm text-slate-300/90">
+      <h2 className="font-[family-name:var(--font-playfair)] text-xl font-semibold text-[#1A1A1A]">Accès Premium</h2>
+      <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]/70">
         Débloque cette lecture pour aller plus loin.
       </p>
-      <p className="mt-3 text-base font-medium text-amber-200">{priceLabel}</p>
-      <div className="mt-4 flex flex-wrap gap-3">
+      <p className="mt-4 text-base font-medium text-[#C9A961]">{priceLabel}</p>
+      <div className="mt-6 flex flex-wrap gap-3">
         <button
           type="button"
           onClick={onUnlock}
           disabled={disabled}
-          className="rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-medium text-slate-900 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-sm bg-[#7C3AED] px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-[#6D28D9] disabled:cursor-not-allowed disabled:opacity-50"
         >
           Débloquer
         </button>
         <button
           type="button"
-          className="rounded-xl border border-slate-500/50 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800/50"
+          className="rounded-sm border border-[#E5E3DD] px-6 py-3 text-sm font-medium text-[#1A1A1A]/70 transition hover:border-[#1A1A1A]/30"
         >
           Plus tard
         </button>

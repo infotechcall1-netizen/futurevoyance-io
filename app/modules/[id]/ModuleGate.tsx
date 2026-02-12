@@ -190,15 +190,15 @@ export default function ModuleGate({ module }: ModuleGateProps) {
 
   if (!mounted) {
     return (
-      <div className="rounded-2xl border border-slate-700/70 bg-slate-950/60 p-6">
-        <p className="text-sm text-slate-400">Chargement…</p>
+      <div className="bg-[#FBFAF7] px-8 py-10">
+        <p className="text-sm text-[#1A1A1A]/50">Chargement…</p>
       </div>
     );
   }
 
   if (!unlocked) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-4">
         <Paywall
           moduleId={module.id}
           title={module.title}
@@ -207,16 +207,16 @@ export default function ModuleGate({ module }: ModuleGateProps) {
           disabled={loading}
         />
         {loading && (
-          <p className="text-sm text-slate-400">Redirection vers le paiement…</p>
+          <p className="text-sm text-[#1A1A1A]/50">Redirection vers le paiement…</p>
         )}
         {checkoutError && (
-          <div className="rounded-xl border border-rose-500/30 bg-rose-950/30 p-3">
-            <p className="text-sm text-rose-200">{checkoutError}</p>
+          <div className="rounded-sm border border-rose-600/30 bg-rose-50 px-5 py-4">
+            <p className="text-sm text-rose-900">{checkoutError}</p>
             {isDev && (
               <button
                 type="button"
                 onClick={handleUnlockLocal}
-                className="mt-2 text-xs text-slate-400 underline hover:text-slate-300"
+                className="mt-2 text-xs text-[#1A1A1A]/60 underline hover:text-[#1A1A1A]"
               >
                 Débloquer en local (DEV)
               </button>

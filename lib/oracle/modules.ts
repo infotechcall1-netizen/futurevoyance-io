@@ -70,3 +70,7 @@ export function getModulesByPortal(
 ): ModuleDef[] {
   return MODULES.filter((m) => m.portal_id === portal_id);
 }
+
+export function isPremiumAlchemyModule(moduleId: string): boolean {
+  return ["shadow-mirror", "decision-ab", "next-step-love", "abundance-key"].includes(moduleId);
+}

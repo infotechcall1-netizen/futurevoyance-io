@@ -22,20 +22,20 @@ export default async function ModulePage({ params }: Props) {
   if (!module) notFound();
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
+    <div className="space-y-12">
+      <div className="space-y-5 border-l-2 border-[#7C3AED] bg-[#FBFAF7] px-8 py-8">
         <Link
           href={`/${module.portal_id}`}
-          className="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/80 hover:text-violet-200"
+          className="text-xs font-medium uppercase tracking-[0.25em] text-[#C9A961] transition-colors hover:text-[#1A1A1A]"
         >
           ← {module.portal_id}
         </Link>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-50">
+        <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-semibold tracking-tight text-[#1A1A1A] md:text-4xl">
           {module.title}
         </h1>
-        <p className="text-sm text-slate-300/90">{module.description}</p>
+        <p className="max-w-3xl text-sm leading-relaxed text-[#1A1A1A]/70">{module.description}</p>
         {module.isPremium && (
-          <span className="inline-block rounded-full bg-amber-500/20 px-3 py-1 text-xs font-medium text-amber-200">
+          <span className="inline-block rounded-sm border border-[#C9A961]/40 bg-[#C9A961]/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#C9A961]">
             Premium
           </span>
         )}

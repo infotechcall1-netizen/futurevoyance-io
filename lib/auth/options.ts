@@ -6,15 +6,37 @@ import { Resend } from "resend";
 
 export function getAuthOptions(): NextAuthOptions {
   const resendApiKey = (process.env.RESEND_API_KEY || "").trim();
+  const nextAuthUrl = (process.env.NEXTAUTH_URL || "").trim();
+  const nextAuthSecret = (process.env.NEXTAUTH_SECRET || "").trim();
+  
+  // Logs de diagnostic (sans afficher les secrets)
+  console.log("[auth] Configuration check:", {
+    hasResendApiKey: !!resendApiKey,
+    resendApiKeyLength: resendApiKey ? resendApiKey.length : 0,
+    nextAuthUrl: nextAuthUrl || "(not set)",
+    hasNextAuthSecret: !!nextAuthSecret,
+    nextAuthSecretLength: nextAuthSecret ? nextAuthSecret.length : 0,
+    nodeEnv: process.env.NODE_ENV,
+  });
+
   const fromEmail = "no-reply@futurevoyance.io";
   const provider = EmailProvider({
     from: fromEmail,
     async sendVerificationRequest({ identifier, url }) {
+      console.log("[auth] sendVerificationRequest called:", {
+        to: identifier,
+        urlOrigin: new URL(url).origin,
+        urlPath: new URL(url).pathname,
+        hasResendApiKey: !!resendApiKey,
+      });
+
       if (!resendApiKey) {
+        console.error("[auth] RESEND_API_KEY is missing");
         throw new Error("RESEND_API_KEY is required for email sign-in");
       }
+      
       const resend = new Resend(resendApiKey);
-      const host = process.env.NEXTAUTH_URL || new URL(url).origin;
+      const host = nextAuthUrl || new URL(url).origin;
       const subject = `Connexion a ${new URL(host).hostname}`;
       const text = `Connecte-toi a FutureVoyance:\n${url}\n\nSi tu n'es pas a l'origine de cette demande, ignore cet email.`;
       const html = `
@@ -30,6 +52,13 @@ export function getAuthOptions(): NextAuthOptions {
           <p><a href="${url}">${url}</a></p>
         </div>
       `;
+      
+      console.log("[auth] Sending email via Resend:", {
+        from: fromEmail,
+        to: identifier,
+        subject,
+      });
+
       const { error } = await resend.emails.send({
         from: fromEmail,
         to: identifier,
@@ -37,14 +66,23 @@ export function getAuthOptions(): NextAuthOptions {
         text,
         html,
       });
+      
       if (error) {
+        console.error("[auth] Resend error:", error);
         throw new Error(`Resend send failed: ${error.message}`);
       }
+      
+      console.log("[auth] Email sent successfully to", identifier);
     },
   });
 
+  if (!nextAuthSecret) {
+    console.error("[auth] NEXTAUTH_SECRET is missing");
+    throw new Error("NEXTAUTH_SECRET is required for NextAuth");
+  }
+
   return {
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: nextAuthSecret,
     session: {
       strategy: "jwt",
     },

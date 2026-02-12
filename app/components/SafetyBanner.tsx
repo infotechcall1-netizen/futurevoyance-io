@@ -30,18 +30,18 @@ export default function SafetyBanner({
 
   return (
     <div
-      className="rounded-xl border border-amber-500/30 bg-amber-950/20 px-4 py-3"
+      className="rounded-sm border border-amber-600/30 bg-amber-50 px-5 py-4"
       data-disclaimer-key={disclaimerKey}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-200/90">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-900">
         Note importante
       </p>
-      <p className="mt-1.5 text-sm text-slate-300/95">
+      <p className="mt-2 text-sm leading-relaxed text-amber-950/90">
         Cet Oracle propose une lecture symbolique et ne remplace pas un avis
         professionnel.
       </p>
       {extraText && (
-        <p className="mt-2 text-sm text-amber-100/90">{extraText}</p>
+        <p className="mt-3 text-sm leading-relaxed text-amber-900">{extraText}</p>
       )}
     </div>
   );

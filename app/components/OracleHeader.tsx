@@ -33,37 +33,41 @@ export default function OracleHeader() {
   }, [status, userEmail]);
 
   return (
-    <header className="border-b border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950/95 text-slate-100">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-        <Link href="/" className="text-sm font-semibold tracking-[0.18em] uppercase text-slate-200">
-          FutureVoyance • <span className="text-violet-300">Oracle IA</span>
+    <header className="border-b border-[#E5E3DD] bg-[#FBFAF7]">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 md:flex-row md:items-center md:justify-between">
+        <Link href="/" className="inline-flex items-center">
+          <img
+            src="/futurevoyance-logo-full.png"
+            alt="Future Voyance"
+            className="h-14 w-auto md:h-16"
+          />
         </Link>
-        <nav className="flex items-center gap-5 text-sm text-slate-200/80">
-          <Link href="/" className="hover:text-violet-200 transition-colors">
+        <nav className="flex flex-wrap items-center gap-6 text-sm text-[#1A1A1A]/60 md:justify-end">
+          <Link href="/" className="transition-colors hover:text-[#7C3AED]">
             Aujourd&apos;hui
           </Link>
-          <Link href="/comprendre" className="hover:text-violet-200 transition-colors">
+          <Link href="/comprendre" className="transition-colors hover:text-[#7C3AED]">
             Comprendre
           </Link>
-          <Link href="/aimer" className="hover:text-violet-200 transition-colors">
+          <Link href="/aimer" className="transition-colors hover:text-[#DB2777]">
             Aimer
           </Link>
-          <Link href="/prevoir" className="hover:text-violet-200 transition-colors">
+          <Link href="/prevoir" className="transition-colors hover:text-[#2563EB]">
             Prévoir
           </Link>
-          <Link href="/recevoir" className="hover:text-violet-200 transition-colors">
+          <Link href="/recevoir" className="transition-colors hover:text-[#059669]">
             Recevoir
           </Link>
-          <Link href="/mon-oracle" className="rounded-full border border-violet-500/40 bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-100 hover:bg-violet-500/20 transition-colors">
+          <Link href="/mon-oracle" className="rounded-sm border border-[#C9A961]/50 bg-[#C9A961]/5 px-4 py-2 text-xs font-medium text-[#C9A961] transition-all hover:bg-[#C9A961]/10">
             Mon Oracle
           </Link>
           {userEmail ? (
             <>
-              <span className="text-xs text-slate-300/90">{userEmail}</span>
+              <span className="max-w-40 truncate text-xs text-[#1A1A1A]/40">{userEmail}</span>
               <button
                 type="button"
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="rounded-full border border-slate-500/40 px-3 py-1.5 text-xs font-medium text-slate-100 transition-colors hover:border-slate-300/60 hover:text-white"
+                className="rounded-sm border border-[#E5E3DD] px-4 py-2 text-xs font-medium text-[#1A1A1A]/70 transition-all hover:border-[#1A1A1A]/30 hover:text-[#1A1A1A]"
               >
                 Se deconnecter
               </button>
@@ -71,7 +75,7 @@ export default function OracleHeader() {
           ) : (
             <Link
               href="/login?callbackUrl=/mon-oracle"
-              className="rounded-full border border-slate-500/40 px-3 py-1.5 text-xs font-medium text-slate-100 transition-colors hover:border-slate-300/60 hover:text-white"
+              className="rounded-sm border border-[#E5E3DD] px-4 py-2 text-xs font-medium text-[#1A1A1A]/70 transition-all hover:border-[#1A1A1A]/30 hover:text-[#1A1A1A]"
             >
               Se connecter
             </Link>

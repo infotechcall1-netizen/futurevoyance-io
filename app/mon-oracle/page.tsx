@@ -22,10 +22,10 @@ const PORTAL_LABELS: Record<PortalId | string, string> = {
 };
 
 const PORTAL_COLORS: Record<PortalId | string, string> = {
-  comprendre: "border-indigo-500/30 bg-indigo-500/5 text-indigo-200",
-  aimer: "border-rose-500/30 bg-rose-500/5 text-rose-200",
-  prevoir: "border-amber-500/30 bg-amber-500/5 text-amber-200",
-  recevoir: "border-teal-500/30 bg-teal-500/5 text-teal-200",
+  comprendre: "border-l-2 border-[#7C3AED] bg-[#FBFAF7]",
+  aimer: "border-l-2 border-[#DB2777] bg-[#FBFAF7]",
+  prevoir: "border-l-2 border-[#2563EB] bg-[#FBFAF7]",
+  recevoir: "border-l-2 border-[#059669] bg-[#FBFAF7]",
 };
 
 type HistoryItem = {
@@ -64,49 +64,49 @@ export default async function MonOraclePage() {
   const history = await getHistory(userKey);
 
   return (
-    <div className="space-y-10">
-      <header className="space-y-3">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-50 font-serif">
+    <div className="space-y-16">
+      <header className="space-y-5">
+        <h1 className="font-[family-name:var(--font-playfair)] text-4xl font-semibold tracking-tight text-[#1A1A1A] md:text-5xl">
           Mon Oracle personnel
         </h1>
-        <p className="max-w-2xl text-sm text-slate-300/90 leading-relaxed">
+        <p className="max-w-2xl text-base leading-relaxed text-[#1A1A1A]/70">
           Un lieu sacré où l&apos;Oracle conserve la trace de tes tirages passés.
           Chaque message est une pierre blanche sur ton chemin.
         </p>
       </header>
 
-      <section className="space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-          <h2 className="text-lg font-medium text-slate-50 italic">Dernières Vibrations</h2>
-          <span className="text-xs text-slate-500 uppercase tracking-widest">{history.length} tirages</span>
+      <section className="space-y-8">
+        <div className="flex items-center justify-between border-b border-[#E5E3DD] pb-3">
+          <h2 className="font-[family-name:var(--font-playfair)] text-2xl font-medium text-[#1A1A1A]">Dernières Vibrations</h2>
+          <span className="text-xs font-medium uppercase tracking-[0.25em] text-[#1A1A1A]/40">{history.length} tirages</span>
         </div>
 
         {history.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/20 p-12 text-center">
-            <p className="text-sm text-slate-400">
+          <div className="border border-dashed border-[#E5E3DD] bg-[#FBFAF7] p-16 text-center">
+            <p className="text-sm leading-relaxed text-[#1A1A1A]/60">
               Ton historique est encore vierge. <br />
               Commence par interroger l&apos;Oracle pour voir tes tirages apparaître ici.
             </p>
             <Link
               href="/comprendre"
-              className="mt-6 inline-block rounded-full bg-violet-600 px-6 py-2 text-sm font-medium text-slate-50 transition hover:bg-violet-500"
+              className="mt-8 inline-block rounded-sm bg-[#7C3AED] px-8 py-3.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#6D28D9]"
             >
               Faire mon premier tirage
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-1 lg:grid-cols-2">
             {history.map((item) => (
               <div
                 key={item.id}
-                className={`group flex flex-col justify-between rounded-2xl border p-5 transition-all hover:bg-slate-900/40 ${PORTAL_COLORS[item.portal_id] || "border-slate-700/70 bg-slate-950/70"}`}
+                className={`group flex flex-col justify-between p-6 transition-all hover:shadow-sm ${PORTAL_COLORS[item.portal_id] || "border-l-2 border-[#7C3AED] bg-[#FBFAF7]"}`}
               >
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-start justify-between">
-                    <span className="rounded-full bg-slate-950/60 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-300 shadow-sm">
+                    <span className="rounded-sm bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#1A1A1A]/70 shadow-sm">
                       {PORTAL_LABELS[item.portal_id] || item.portal_id}
                     </span>
-                    <span className="text-[10px] font-medium text-slate-500">
+                    <span className="text-[10px] font-medium text-[#1A1A1A]/40">
                       {new Date(item.timestamp).toLocaleDateString("fr-FR", {
                         day: "numeric",
                         month: "short",
@@ -116,23 +116,23 @@ export default async function MonOraclePage() {
                     </span>
                   </div>
 
-                  <div className="space-y-1">
-                    <p className="text-xs italic text-slate-500 line-clamp-1 group-hover:text-slate-400">
+                  <div className="space-y-2">
+                    <p className="text-xs italic text-[#1A1A1A]/50 line-clamp-1 group-hover:text-[#1A1A1A]/60">
                       &ldquo;{item.prompt}&rdquo;
                     </p>
-                    <p className="text-sm font-medium text-slate-200 leading-snug">
+                    <p className="text-sm font-medium leading-snug text-[#1A1A1A]">
                       {item.response.content.essentiel}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-700/30">
-                  <span className="text-[11px] text-slate-500 group-hover:text-slate-400 transition">
+                <div className="mt-5 flex items-center justify-between border-t border-[#E5E3DD] pt-4">
+                  <span className="text-[11px] text-[#1A1A1A]/50 transition group-hover:text-[#1A1A1A]/60">
                     {item.response.content.cta_label}
                   </span>
                   <Link
                     href={`/modules/${item.response.routing.module_id}`}
-                    className="text-[11px] font-semibold text-violet-400 hover:text-violet-300 transition"
+                    className="text-[11px] font-semibold text-[#7C3AED] transition hover:text-[#6D28D9]"
                   >
                     Revoir →
                   </Link>
@@ -143,12 +143,12 @@ export default async function MonOraclePage() {
         )}
       </section>
 
-      <section className="space-y-3 rounded-2xl border border-slate-700/70 bg-slate-950/70 p-6 opacity-60">
+      <section className="space-y-4 border-l-2 border-[#C9A961] bg-[#FBFAF7] px-6 py-8 opacity-70">
         <div className="flex items-center gap-2">
-          <div className="size-2 rounded-full bg-violet-500 animate-pulse" />
-          <h2 className="text-sm font-semibold text-slate-50 uppercase tracking-widest">Rituels & Pratiques (Bientôt)</h2>
+          <div className="size-2 rounded-full bg-[#C9A961] animate-pulse" />
+          <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-[#C9A961]">Rituels & Pratiques (Bientôt)</h2>
         </div>
-        <p className="text-xs text-slate-400 leading-relaxed">
+        <p className="text-sm leading-relaxed text-[#1A1A1A]/60">
           Bientôt, tu pourras enregistrer tes habitudes énergétiques et
           pratiques spirituelles pour que l&apos;Oracle puisse les relier à tes
           cycles.
