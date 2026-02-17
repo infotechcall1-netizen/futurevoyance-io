@@ -50,10 +50,6 @@ This project uses **NextAuth.js v4** with multiple authentication methods:
    - Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
    - Configure in [Google Cloud Console](https://console.cloud.google.com/)
 
-3. **Facebook OAuth** (optional)
-   - Requires `FACEBOOK_CLIENT_ID` and `FACEBOOK_CLIENT_SECRET`
-   - Configure in [Facebook Developers](https://developers.facebook.com/)
-
 ### Required Environment Variables
 
 Copy `.env.example` to `.env.local` and fill in:
@@ -70,10 +66,6 @@ UPSTASH_REDIS_REST_TOKEN=your-upstash-token
 # Optional: Google OAuth
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-# Optional: Facebook OAuth
-FACEBOOK_CLIENT_ID=your-facebook-app-id
-FACEBOOK_CLIENT_SECRET=your-facebook-app-secret
 ```
 
 ### Google OAuth Setup
@@ -84,15 +76,6 @@ FACEBOOK_CLIENT_SECRET=your-facebook-app-secret
 4. Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
 5. Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google` (dev) and your production URL
 6. Copy Client ID and Client Secret to `.env.local`
-
-### Facebook OAuth Setup
-
-1. Go to [Facebook Developers](https://developers.facebook.com/)
-2. Create a new app or select existing
-3. Add "Facebook Login" product
-4. In Settings → Basic, copy App ID and App Secret
-5. In Facebook Login → Settings, add valid OAuth redirect URI: `http://localhost:3000/api/auth/callback/facebook`
-6. Copy credentials to `.env.local`
 
 ### User Registration Endpoint
 

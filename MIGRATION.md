@@ -21,7 +21,6 @@
 - **Fichier**: `lib/auth/options.ts`
 - **Providers ajoutés**:
   - ✅ GoogleProvider (optionnel)
-  - ✅ FacebookProvider (optionnel)
   - ✅ CredentialsProvider (email + password)
 - **Supprimé**: EmailProvider (magic link)
 
@@ -60,10 +59,6 @@ UPSTASH_REDIS_REST_TOKEN=your-token
 # Google OAuth (optionnel)
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-# Facebook OAuth (optionnel)
-FACEBOOK_CLIENT_ID=your-facebook-app-id
-FACEBOOK_CLIENT_SECRET=your-facebook-app-secret
 ```
 
 ## 🚀 Déploiement
@@ -79,7 +74,7 @@ npm install
 
 1. Copier `.env.example` vers `.env.local`
 2. Remplir les valeurs obligatoires
-3. (Optionnel) Configurer Google/Facebook OAuth
+3. (Optionnel) Configurer Google OAuth
 
 ### Étape 3: Tester en Local
 
@@ -91,7 +86,6 @@ Visiter `http://localhost:3000/login` et tester:
 - ✅ Création de compte (signup)
 - ✅ Connexion avec credentials
 - ✅ (Si configuré) Connexion Google
-- ✅ (Si configuré) Connexion Facebook
 - ✅ Redirection avec callbackUrl
 
 ### Étape 4: Vérifier la Build
@@ -115,18 +109,6 @@ Aucune erreur TypeScript ne doit apparaître.
    - Development: `http://localhost:3000/api/auth/callback/google`
    - Production: `https://your-domain.com/api/auth/callback/google`
 7. Copier Client ID et Secret dans `.env.local`
-
-### Facebook OAuth
-
-1. **Facebook Developers**: https://developers.facebook.com/
-2. Créer/sélectionner une app
-3. Ajouter le produit "Facebook Login"
-4. Settings → Basic:
-   - Copier App ID → `FACEBOOK_CLIENT_ID`
-   - Copier App Secret → `FACEBOOK_CLIENT_SECRET`
-5. Facebook Login → Settings → Valid OAuth Redirect URIs:
-   - Development: `http://localhost:3000/api/auth/callback/facebook`
-   - Production: `https://your-domain.com/api/auth/callback/facebook`
 
 ## 📊 Structure Redis
 
@@ -175,13 +157,7 @@ Key: account:{provider}:{providerAccountId}
    - [ ] Retour et création session
    - [ ] Redirection vers callbackUrl
 
-4. **Facebook OAuth** (si configuré):
-   - [ ] Bouton "Continuer avec Facebook" fonctionne
-   - [ ] Redirect vers Facebook
-   - [ ] Retour et création session
-   - [ ] Redirection vers callbackUrl
-
-5. **Session Persistence**:
+4. **Session Persistence**:
    - [ ] Session persistante après refresh
    - [ ] Logout fonctionne
    - [ ] Protected pages redirigent vers login
@@ -220,7 +196,7 @@ Key: account:{provider}:{providerAccountId}
 ## 🎯 Résultat Attendu
 
 - ✅ Login moderne avec toggle signup/signin
-- ✅ OAuth Google + Facebook (si configuré)
+- ✅ OAuth Google (si configuré)
 - ✅ Credentials (email + password)
 - ✅ Signup sécurisé avec validation
 - ✅ No TypeScript errors

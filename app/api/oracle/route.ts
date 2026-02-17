@@ -6,55 +6,41 @@ import { oracleResponseSchema, premiumOracleResponseSchema, type OracleResponse 
 import { safeJson } from "@/lib/oracle/safeJson";
 import { normalizeOracleResponse } from "@/lib/oracle/normalize";
 import { isPremiumAlchemyModule } from "@/lib/oracle/modules";
+import {
+  getGoogleCredentialsEnvPresence,
+  loadGoogleServiceAccountCredentials,
+} from "@/lib/oracle/credentials";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
 /* ── Lazy GCP credentials bootstrap (called at runtime, not module load) ── */
 let gcpCredentialsInitialized = false;
+let gcpCredentialsSource: string = "none";
 
 function ensureGCPCredentials() {
   if (gcpCredentialsInitialized) return;
   gcpCredentialsInitialized = true;
 
-  if (
-    process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-    !process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
-  ) {
+  const credentialsPath = (process.env.GOOGLE_APPLICATION_CREDENTIALS || "").trim();
+  if (credentialsPath) {
+    gcpCredentialsSource = "GOOGLE_APPLICATION_CREDENTIALS";
     return;
   }
 
   try {
-    const raw = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-    if (!raw || typeof raw !== "string") {
-      console.warn("[oracle] GOOGLE_APPLICATION_CREDENTIALS_JSON is empty or invalid");
-      return;
-    }
-
-    // Vercel stores the JSON with literal \\n in env – normalize it
-    const json = raw.replace(/\\n/g, "\n");
-    
-    // Safe JSON parse with try/catch
-    let parsed;
-    try {
-      parsed = JSON.parse(json);
-    } catch (parseErr) {
-      console.warn("[oracle] Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON:", parseErr instanceof Error ? parseErr.message : String(parseErr));
-      return;
-    }
-
-    // Validate it has required fields
-    if (!parsed || typeof parsed !== "object" || !parsed.private_key) {
-      console.warn("[oracle] GOOGLE_APPLICATION_CREDENTIALS_JSON is missing required fields");
-      return;
-    }
+    const { credentials, sourceEnv } = loadGoogleServiceAccountCredentials();
+    gcpCredentialsSource = sourceEnv;
 
     const tmpPath = path.join(os.tmpdir(), "gcp-sa-vertex.json");
-    fs.writeFileSync(tmpPath, json, "utf-8");
+    fs.writeFileSync(tmpPath, JSON.stringify(credentials), "utf-8");
     process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
-    console.log("[oracle] Wrote GCP SA key to", tmpPath);
+    console.log("[oracle] Bootstrapped GCP credentials from env source:", sourceEnv);
   } catch (err) {
-    console.warn("[oracle] Failed to bootstrap GCP credentials from JSON env:", err instanceof Error ? err.message : String(err));
+    console.warn(
+      "[oracle] Failed to bootstrap GCP credentials:",
+      err instanceof Error ? err.message : String(err)
+    );
   }
 }
 
@@ -291,6 +277,11 @@ export async function POST(req: Request) {
 
   const modelId = (process.env.GOOGLE_CLOUD_MODEL || "").trim() || "gemini-2.0-flash-001";
   const location = (process.env.GOOGLE_CLOUD_LOCATION || "").trim() || "us-central1";
+  ensureGCPCredentials();
+  const credentialsPresence = getGoogleCredentialsEnvPresence();
+  const hasCredentialsPath =
+    typeof process.env.GOOGLE_APPLICATION_CREDENTIALS === "string" &&
+    process.env.GOOGLE_APPLICATION_CREDENTIALS.trim().length > 0;
 
   let body: { prompt?: string; portal_id?: string; module_id?: string } = {};
   try {
@@ -318,7 +309,8 @@ export async function POST(req: Request) {
     location,
     modelId,
     isPremium,
-    has_credentials_env: typeof process.env.GOOGLE_APPLICATION_CREDENTIALS === "string" && process.env.GOOGLE_APPLICATION_CREDENTIALS.length > 0,
+    has_credentials_env: hasCredentialsPath || credentialsPresence.hasCredentialsEnv,
+    credentials_env_source: gcpCredentialsSource !== "none" ? gcpCredentialsSource : credentialsPresence.sourceEnv,
   }));
 
   const userPayload = JSON.stringify({ prompt, portal_id, module_id });

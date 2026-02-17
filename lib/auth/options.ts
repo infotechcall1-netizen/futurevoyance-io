@@ -1,6 +1,5 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import FacebookProvider from "next-auth/providers/facebook";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
@@ -13,15 +12,12 @@ import bcrypt from "bcryptjs";
  * - Ce fichier s'exécute côté SERVEUR uniquement (API Routes)
  * - Les CLIENT_SECRET ne sont JAMAIS exposés au client/navigateur
  * - Les variables d'environnement doivent être configurées dans Vercel
- * - Facebook Callback URL: /api/auth/callback/facebook
  * - Google Callback URL: /api/auth/callback/google
  */
 export function getAuthOptions(): NextAuthOptions {
   const nextAuthSecret = (process.env.NEXTAUTH_SECRET || "").trim();
   const googleClientId = (process.env.GOOGLE_CLIENT_ID || "").trim();
   const googleClientSecret = (process.env.GOOGLE_CLIENT_SECRET || "").trim();
-  const facebookClientId = (process.env.FACEBOOK_CLIENT_ID || "").trim();
-  const facebookClientSecret = (process.env.FACEBOOK_CLIENT_SECRET || "").trim();
   const nextAuthUrl = (process.env.NEXTAUTH_URL || "").trim();
 
   console.log("[auth] Configuration check:", {
@@ -30,7 +26,6 @@ export function getAuthOptions(): NextAuthOptions {
     hasGoogleOAuth: !!googleClientId && !!googleClientSecret,
     googleClientIdLength: googleClientId.length,
     googleSecretLength: googleClientSecret.length,
-    hasFacebookOAuth: !!facebookClientId && !!facebookClientSecret,
     nodeEnv: process.env.NODE_ENV,
     googleClientIdPrefix: googleClientId ? googleClientId.substring(0, 15) + "..." : "missing",
     googleSecretPrefix: googleClientSecret ? googleClientSecret.substring(0, 10) + "..." : "missing",
@@ -53,20 +48,6 @@ export function getAuthOptions(): NextAuthOptions {
       GoogleProvider({
         clientId: googleClientId,
         clientSecret: googleClientSecret,
-      })
-    );
-  }
-
-  // Facebook OAuth Provider
-  // IMPORTANT: Ne JAMAIS exposer FACEBOOK_CLIENT_SECRET côté client
-  // Les secrets sont uniquement utilisés côté serveur (API Routes)
-  // Callback URL automatique: /api/auth/callback/facebook
-  // Configuration Meta: https://developers.facebook.com/apps
-  if (facebookClientId && facebookClientSecret) {
-    providers.push(
-      FacebookProvider({
-        clientId: facebookClientId,
-        clientSecret: facebookClientSecret,
       })
     );
   }
@@ -174,6 +155,14 @@ export function getAuthOptions(): NextAuthOptions {
       },
     },
     callbacks: {
+      async redirect({ url, baseUrl }) {
+        // Allow relative paths
+        if (url.startsWith("/")) return baseUrl + url;
+        // Allow same-origin redirects
+        if (url.startsWith(baseUrl)) return url;
+        // Fallback: prevent open redirects
+        return baseUrl;
+      },
       async signIn({ user, account, profile }) {
         console.log("[NextAuth Callback] signIn:", {
           userId: user?.id,
