@@ -6,6 +6,16 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+/**
+ * NextAuth Configuration Options
+ * 
+ * SÉCURITÉ IMPORTANTE:
+ * - Ce fichier s'exécute côté SERVEUR uniquement (API Routes)
+ * - Les CLIENT_SECRET ne sont JAMAIS exposés au client/navigateur
+ * - Les variables d'environnement doivent être configurées dans Vercel
+ * - Facebook Callback URL: /api/auth/callback/facebook
+ * - Google Callback URL: /api/auth/callback/google
+ */
 export function getAuthOptions(): NextAuthOptions {
   const nextAuthSecret = (process.env.NEXTAUTH_SECRET || "").trim();
   const googleClientId = (process.env.GOOGLE_CLIENT_ID || "").trim();
@@ -35,7 +45,9 @@ export function getAuthOptions(): NextAuthOptions {
 
   const providers = [];
 
-  // Google OAuth
+  // Google OAuth Provider
+  // IMPORTANT: Ne JAMAIS exposer GOOGLE_CLIENT_SECRET côté client
+  // Les secrets sont uniquement utilisés côté serveur (API Routes)
   if (googleClientId && googleClientSecret) {
     providers.push(
       GoogleProvider({
@@ -45,7 +57,11 @@ export function getAuthOptions(): NextAuthOptions {
     );
   }
 
-  // Facebook OAuth
+  // Facebook OAuth Provider
+  // IMPORTANT: Ne JAMAIS exposer FACEBOOK_CLIENT_SECRET côté client
+  // Les secrets sont uniquement utilisés côté serveur (API Routes)
+  // Callback URL automatique: /api/auth/callback/facebook
+  // Configuration Meta: https://developers.facebook.com/apps
   if (facebookClientId && facebookClientSecret) {
     providers.push(
       FacebookProvider({
