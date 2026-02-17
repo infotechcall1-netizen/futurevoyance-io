@@ -1,18 +1,16 @@
-import { PrismaClient } from "@/lib/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// In Prisma 7 + @prisma/adapter-neon 7.x, PrismaNeon is a factory.
-// It takes a Pool config object (NOT a Pool instance) and creates
-// the pool internally when Prisma calls adapter.connect().
 const connectionString =
   process.env.DATABASE_URL_UNPOOLED ||
   process.env.POSTGRES_URL_NON_POOLING ||
   process.env.DATABASE_URL;
 
+// Prisma 7.4+ Neon adapter: class-based API
 const adapter = new PrismaNeon({ connectionString });
 
 export const prisma =

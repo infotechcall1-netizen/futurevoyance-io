@@ -10,22 +10,51 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-/* ── Bootstrap GCP credentials from inline JSON (Vercel) ── */
-if (
-  !process.env.GOOGLE_APPLICATION_CREDENTIALS &&
-  process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
-) {
+/* ── Lazy GCP credentials bootstrap (called at runtime, not module load) ── */
+let gcpCredentialsInitialized = false;
+
+function ensureGCPCredentials() {
+  if (gcpCredentialsInitialized) return;
+  gcpCredentialsInitialized = true;
+
+  if (
+    process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+    !process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
+  ) {
+    return;
+  }
+
   try {
     const raw = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-    // Vercel stores the JSON with literal \n in env – normalise it
+    if (!raw || typeof raw !== "string") {
+      console.warn("[oracle] GOOGLE_APPLICATION_CREDENTIALS_JSON is empty or invalid");
+      return;
+    }
+
+    // Vercel stores the JSON with literal \\n in env – normalize it
     const json = raw.replace(/\\n/g, "\n");
-    JSON.parse(json); // validate before writing
+    
+    // Safe JSON parse with try/catch
+    let parsed;
+    try {
+      parsed = JSON.parse(json);
+    } catch (parseErr) {
+      console.warn("[oracle] Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON:", parseErr instanceof Error ? parseErr.message : String(parseErr));
+      return;
+    }
+
+    // Validate it has required fields
+    if (!parsed || typeof parsed !== "object" || !parsed.private_key) {
+      console.warn("[oracle] GOOGLE_APPLICATION_CREDENTIALS_JSON is missing required fields");
+      return;
+    }
+
     const tmpPath = path.join(os.tmpdir(), "gcp-sa-vertex.json");
     fs.writeFileSync(tmpPath, json, "utf-8");
     process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
     console.log("[oracle] Wrote GCP SA key to", tmpPath);
   } catch (err) {
-    console.error("[oracle] Failed to bootstrap GCP credentials from JSON env:", err);
+    console.warn("[oracle] Failed to bootstrap GCP credentials from JSON env:", err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -206,6 +235,9 @@ function buildFallback(portal_id: string, module_id: string, isPremium: boolean)
 }
 
 function getVertexModel(project: string, location: string, modelId: string, systemPrompt: string) {
+  // Ensure GCP credentials are bootstrapped before creating VertexAI client
+  ensureGCPCredentials();
+  
   const vertex = new VertexAI({
     project,
     location,
