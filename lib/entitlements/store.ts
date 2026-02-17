@@ -86,7 +86,7 @@ export async function setEntitled(userKey: string, moduleId: string): Promise<vo
   const unlockedAt = new Date().toISOString();
   const key = entitlementKey(normalizedUserKey, normalizedModuleId);
 
-  if (hasUpstash) {
+  if (hasUpstash && redis) {
     const existing = await redis.get<string>(key);
     if (typeof existing === "string" && existing.length > 0) return;
     await redis.set(key, unlockedAt);
@@ -113,7 +113,7 @@ export async function isEntitled(userKey: string, moduleId: string): Promise<boo
   const normalizedModuleId = normalizeModuleId(moduleId);
   if (!normalizedUserKey || !normalizedModuleId) return false;
 
-  if (hasUpstash) {
+  if (hasUpstash && redis) {
     const v = await redis.get<string>(entitlementKey(normalizedUserKey, normalizedModuleId));
     return typeof v === "string" && v.length > 0;
   }
@@ -130,7 +130,7 @@ export async function listEntitledModules(userKey: string): Promise<string[]> {
   const normalizedUserKey = normalizeUserKey(userKey);
   if (!normalizedUserKey) return [];
 
-  if (hasUpstash) {
+  if (hasUpstash && redis) {
     const indexKey = entitlementIndexKey(normalizedUserKey);
     const indexedModules = await redis.smembers<string[]>(indexKey);
     const modules = new Set(

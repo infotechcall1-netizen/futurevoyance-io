@@ -6,6 +6,28 @@ import { oracleResponseSchema, premiumOracleResponseSchema, type OracleResponse 
 import { safeJson } from "@/lib/oracle/safeJson";
 import { normalizeOracleResponse } from "@/lib/oracle/normalize";
 import { isPremiumAlchemyModule } from "@/lib/oracle/modules";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+/* ── Bootstrap GCP credentials from inline JSON (Vercel) ── */
+if (
+  !process.env.GOOGLE_APPLICATION_CREDENTIALS &&
+  process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
+) {
+  try {
+    const raw = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+    // Vercel stores the JSON with literal \n in env – normalise it
+    const json = raw.replace(/\\n/g, "\n");
+    JSON.parse(json); // validate before writing
+    const tmpPath = path.join(os.tmpdir(), "gcp-sa-vertex.json");
+    fs.writeFileSync(tmpPath, json, "utf-8");
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
+    console.log("[oracle] Wrote GCP SA key to", tmpPath);
+  } catch (err) {
+    console.error("[oracle] Failed to bootstrap GCP credentials from JSON env:", err);
+  }
+}
 
 const BASE_SYSTEM_PROMPT = `
 Tu es l'Oracle vivant de FutureVoyance.

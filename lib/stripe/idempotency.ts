@@ -30,7 +30,7 @@ export async function markWebhookProcessed(eventId: string): Promise<boolean> {
 
   const key = webhookEventKey(normalizedEventId);
 
-  if (hasUpstash) {
+  if (hasUpstash && redis) {
     const existing = await redis.get<string>(key);
     if (typeof existing === "string" && existing.length > 0) {
       return false;

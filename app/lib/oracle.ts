@@ -6,6 +6,9 @@ export type OracleVibration = {
   dailyRitual: string;
   personalMessage: string;
   personalRitual: string;
+  day_calc_steps?: string[];
+  life_path_steps?: string[];
+  personal_resonance_steps?: string[];
 };
 
 const ORACLE_VIBRATIONS: Record<number, OracleVibration> = {
@@ -125,8 +128,45 @@ const ORACLE_VIBRATIONS: Record<number, OracleVibration> = {
       "Ton Oracle souligne une mue : une version de toi a terminé son cycle. Tu peux honorer ce qui a été tout en accueillant ce qui vient.",
     personalRitual:
       "Choisis un objet, une habitude ou une croyance dont tu sens l’usure. Décide d’un geste concret pour t’en détacher avant la fin du mois.",
+  },  11: {
+    vibration: 11,
+    title: "Portail de l'Illumination",
+    keyword: "Vision",
+    dailyMessage:
+      "Un nombre maître éclaire cette journée. Les synchronicités parlent plus fort : accueille-les comme des confirmations silencieuses de ta direction.",
+    dailyRitual:
+      "Note trois signes ou coïncidences que tu observes aujourd'hui. Avant de dormir, relis-les et cherche le fil invisible qui les relie.",
+    personalMessage:
+      "Le 11 amplifie ton intuition et souligne un alignement rare entre ton chemin de naissance et l'énergie du jour. Ce que tu pressens mérite d'être écouté.",
+    personalRitual:
+      "Assieds-toi en silence, ferme les yeux et pose une question intérieure. Reste attentif·e au premier symbole, mot ou image qui émerge — il porte un message pour toi.",
   },
-};
+  22: {
+    vibration: 22,
+    title: "L'Architecte sacré",
+    keyword: "Manifestation",
+    dailyMessage:
+      "Le nombre maître 22 porte la vision la plus ambitieuse vers la matière. Ce que tu construis aujourd'hui peut dépasser ce que tu imaginais possible.",
+    dailyRitual:
+      "Dessine ou écris ta vision la plus large pour les mois à venir. Pas de censure : laisse émerger l'ampleur, puis choisis un premier geste concret.",
+    personalMessage:
+      "Le 22 t'appelle à devenir bâtisseur·euse : un projet, un lien, une fondation intérieure demande ta maîtrise calme et ta patience structurée.",
+    personalRitual:
+      "Choisis un domaine de ta vie et décris en quatre phrases la forme idéale qu'il pourrait prendre. Engage une première action dès demain.",
+  },
+  33: {
+    vibration: 33,
+    title: "Le Maître enseignant",
+    keyword: "Compassion",
+    dailyMessage:
+      "Le 33 est le plus rare des nombres maîtres. L'énergie du jour t'invite à élever les autres en partageant ce que tu as traversé avec douceur et vérité.",
+    dailyRitual:
+      "Envoie un message sincère à quelqu'un qui a besoin d'être entendu. Pas de conseil : juste ta présence et tes mots vrais.",
+    personalMessage:
+      "Le 33 unit la vision du 11 et la force du 22. Ton chemin aujourd'hui demande un acte de service lucide, sans sacrifice ni oubli de toi-même.",
+    personalRitual:
+      "Identifie un savoir ou une expérience que tu pourrais transmettre. Offre-le aujourd'hui, même modestement, à une personne qui en a besoin.",
+  },};
 
 export function reduceTo9(input: number): number {
   const n = Math.abs(Math.floor(input));
@@ -134,17 +174,94 @@ export function reduceTo9(input: number): number {
   return ((n - 1) % 9) + 1;
 }
 
+/* ── Traditional numerology helpers ─────────────────────────── */
+
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+function fmtDate(day: number, month: number, year: number): string {
+  return `${pad2(day)}/${pad2(month)}/${year}`;
+}
+
+/**
+ * Traditional digit-sum reduction of a DD/MM/YYYY date string.
+ * Reduces to 1–9. Notes master numbers 11/22/33 if they appear.
+ */
+function traditionalDateReduce(dateStr: string): { value: number; steps: string[] } {
+  const digits = dateStr.replace(/\//g, "").split("");
+  const steps: string[] = [dateStr];
+
+  let sum = digits.reduce((s, c) => s + Number(c), 0);
+  steps.push(`${digits.join("+")} = ${sum}`);
+
+  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+    const chars = String(sum).split("");
+    const next = chars.reduce((s, c) => s + Number(c), 0);
+    steps.push(`${chars.join("+")} = ${next}`);
+    sum = next;
+  }
+
+  if (sum === 11 || sum === 22 || sum === 33) {
+    steps.push(`${sum} est un nombre maître`);
+  }
+
+  return { value: sum, steps };
+}
+
+/**
+ * Life path from a DD/MM/YYYY date string.
+ * Stops reduction at master numbers 11/22/33.
+ */
+function lifePathFromDate(dateStr: string): {
+  traditional: number;
+  reduced: number;
+  steps: string[];
+} {
+  const digits = dateStr.replace(/\//g, "").split("");
+  const steps: string[] = [dateStr];
+
+  let sum = digits.reduce((s, c) => s + Number(c), 0);
+  steps.push(`${digits.join("+")} = ${sum}`);
+
+  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+    const chars = String(sum).split("");
+    const next = chars.reduce((s, c) => s + Number(c), 0);
+    steps.push(`${chars.join("+")} = ${next}`);
+    sum = next;
+  }
+
+  const traditional = sum;
+  let reduced = sum;
+  if (reduced > 9) {
+    reduced = String(reduced)
+      .split("")
+      .reduce((s, c) => s + Number(c), 0);
+  }
+
+  return { traditional, reduced, steps };
+}
+
+/* ── Exported helpers ───────────────────────────────────────── */
+
 export function dailyVibration(date: Date): number {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
   const day = date.getDate();
-  const numericDate = year * 10000 + month * 100 + day;
-  return reduceTo9(numericDate);
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  return traditionalDateReduce(fmtDate(day, month, year)).value;
 }
 
 export function oracleOfDay(date: Date): OracleVibration {
-  const vibration = dailyVibration(date);
-  return ORACLE_VIBRATIONS[vibration];
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  const dateStr = fmtDate(day, month, year);
+  const { value, steps } = traditionalDateReduce(dateStr);
+
+  return {
+    ...ORACLE_VIBRATIONS[value],
+    day_calc_steps: steps,
+  };
 }
 
 export function oraclePersonal(date: Date, birthISO: string): OracleVibration {
@@ -154,18 +271,44 @@ export function oraclePersonal(date: Date, birthISO: string): OracleVibration {
     return oracleOfDay(date);
   }
 
-  const byear = birth.getFullYear();
-  const bmonth = birth.getMonth() + 1;
-  const bday = birth.getDate();
-  const birthNumber = byear * 10000 + bmonth * 100 + bday;
+  /* Life path */
+  const bDay = birth.getDate();
+  const bMonth = birth.getMonth() + 1;
+  const bYear = birth.getFullYear();
+  const birthDateStr = fmtDate(bDay, bMonth, bYear);
+  const lp = lifePathFromDate(birthDateStr);
+  const lifePathSteps = [...lp.steps];
+  if (lp.traditional !== lp.reduced) {
+    lifePathSteps.push(`${lp.traditional} est un nombre maître`);
+  }
 
-  const dyear = date.getFullYear();
-  const dmonth = date.getMonth() + 1;
-  const dday = date.getDate();
-  const todayNumber = dyear * 10000 + dmonth * 100 + dday;
+  /* Daily vibration (same digital-root as traditional sum) */
+  const dayVib = dailyVibration(date);
 
-  const combined = reduceTo9(birthNumber * 3 + todayNumber * 7);
+  /* Resonance = life_path + daily_vibration */
+  const raw = lp.traditional + dayVib;
+  const resonanceSteps: string[] = [];
+  let resonance: number;
 
-  return ORACLE_VIBRATIONS[combined];
+  if (raw === 11 || raw === 22 || raw === 33) {
+    resonanceSteps.push(`${lp.traditional} + ${dayVib} = ${raw}`);
+    resonanceSteps.push(`${raw} est un nombre maître`);
+    resonance = raw;
+  } else if (raw > 9) {
+    resonanceSteps.push(`${lp.traditional} + ${dayVib} = ${raw}`);
+    const chars = String(raw).split("");
+    const reduced = chars.reduce((s, c) => s + Number(c), 0);
+    resonanceSteps.push(`${chars.join("+")} = ${reduced}`);
+    resonance = reduced;
+  } else {
+    resonanceSteps.push(`${lp.traditional} + ${dayVib} = ${raw}`);
+    resonance = raw;
+  }
+
+  return {
+    ...ORACLE_VIBRATIONS[resonance],
+    life_path_steps: lifePathSteps,
+    personal_resonance_steps: resonanceSteps,
+  };
 }
 

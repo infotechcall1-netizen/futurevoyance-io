@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import PortalCard from "./components/PortalCard";
-import OracleLive from "./components/OracleLive";
+import DailyVibrationCombined from "./components/DailyVibrationCombined";
 import OracleChat from "./components/OracleChat";
 import ViewEvent from "./components/ViewEvent";
 import { oracleOfDay } from "./lib/oracle";
+import HeroOracle from "./components/HeroOracle";
 
 export const metadata: Metadata = {
   title: "FutureVoyance • Oracle IA du jour",
@@ -24,47 +25,20 @@ export default function Home() {
   return (
     <div className="space-y-32">
       <ViewEvent name="view_oracle_home" />
-      
-      {/* Hero */}
-      <section className="relative py-32 md:py-40">
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden opacity-[0.02]">
-          <span className="font-[family-name:var(--font-playfair)] text-[20vw] font-bold leading-none tracking-tighter text-gray-400">
-            ORACLE
-          </span>
-        </div>
-        
-        <div className="relative mx-auto max-w-4xl space-y-16 text-center">
-          <div className="space-y-8">
-            <p className="text-xs font-medium uppercase tracking-[0.35em] text-[#C9A961]">
-              FutureVoyance
-            </p>
-            <h1 className="font-[family-name:var(--font-playfair)] text-6xl font-semibold leading-[1.08] tracking-tight text-[#1A1A1A] md:text-7xl lg:text-8xl">
-              L'Oracle qui{" "}
-              <span className="italic text-[#7C3AED]">révèle</span>
-            </h1>
-          </div>
-          
-          <div className="mx-auto max-w-xl">
-            <a
-              href="#oracle-chat"
-              className="group inline-flex items-center gap-2 rounded-sm bg-[#7C3AED] px-12 py-5 text-base font-medium text-white shadow-sm transition-all hover:bg-[#6D28D9]"
-            >
-              Recevoir ton message
-              <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
-        </div>
-      </section>
+
+      {/* Hero Oracle */}
+      <HeroOracle />
+
+      {/* Combined: Vibration du jour + Résonance personnelle */}
+      <DailyVibrationCombined todayLabel={todayLabel} initialDayOracle={dayOracle} />
 
       {/* Oracle Input */}
+      <div id="oracle" />
       <section id="oracle-chat" className="mx-auto max-w-3xl">
         <OracleChat />
       </section>
 
-      {/* Day Oracle */}
-      <OracleLive todayLabel={todayLabel} initialDayOracle={dayOracle} />
+      {/* Day Oracle (moved above as part of combined section) */}
 
       {/* Portals */}
       <section className="space-y-16">

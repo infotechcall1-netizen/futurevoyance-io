@@ -43,3 +43,8 @@ next-env.d.ts
 # Google service account (DO NOT COMMIT)
 gcp-sa.json
 
+
+/lib/generated/prisma
+
+.vercel
+.env*.local

@@ -1,79 +1,31 @@
 import type { NextAuthOptions } from "next-auth";
-import EmailProvider from "next-auth/providers/email";
-import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
-import { redis } from "@/lib/redis";
-import { Resend } from "resend";
+import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import prisma from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export function getAuthOptions(): NextAuthOptions {
-  const resendApiKey = (process.env.RESEND_API_KEY || "").trim();
-  const nextAuthUrl = (process.env.NEXTAUTH_URL || "").trim();
   const nextAuthSecret = (process.env.NEXTAUTH_SECRET || "").trim();
-  
-  // Logs de diagnostic (sans afficher les secrets)
+  const googleClientId = (process.env.GOOGLE_CLIENT_ID || "").trim();
+  const googleClientSecret = (process.env.GOOGLE_CLIENT_SECRET || "").trim();
+  const facebookClientId = (process.env.FACEBOOK_CLIENT_ID || "").trim();
+  const facebookClientSecret = (process.env.FACEBOOK_CLIENT_SECRET || "").trim();
+  const nextAuthUrl = (process.env.NEXTAUTH_URL || "").trim();
+
   console.log("[auth] Configuration check:", {
-    hasResendApiKey: !!resendApiKey,
-    resendApiKeyLength: resendApiKey ? resendApiKey.length : 0,
-    nextAuthUrl: nextAuthUrl || "(not set)",
     hasNextAuthSecret: !!nextAuthSecret,
-    nextAuthSecretLength: nextAuthSecret ? nextAuthSecret.length : 0,
+    nextAuthSecretLength: nextAuthSecret.length,
+    hasGoogleOAuth: !!googleClientId && !!googleClientSecret,
+    googleClientIdLength: googleClientId.length,
+    googleSecretLength: googleClientSecret.length,
+    hasFacebookOAuth: !!facebookClientId && !!facebookClientSecret,
     nodeEnv: process.env.NODE_ENV,
-  });
-
-  const fromEmail = "no-reply@futurevoyance.io";
-  const provider = EmailProvider({
-    from: fromEmail,
-    async sendVerificationRequest({ identifier, url }) {
-      console.log("[auth] sendVerificationRequest called:", {
-        to: identifier,
-        urlOrigin: new URL(url).origin,
-        urlPath: new URL(url).pathname,
-        hasResendApiKey: !!resendApiKey,
-      });
-
-      if (!resendApiKey) {
-        console.error("[auth] RESEND_API_KEY is missing");
-        throw new Error("RESEND_API_KEY is required for email sign-in");
-      }
-      
-      const resend = new Resend(resendApiKey);
-      const host = nextAuthUrl || new URL(url).origin;
-      const subject = `Connexion a ${new URL(host).hostname}`;
-      const text = `Connecte-toi a FutureVoyance:\n${url}\n\nSi tu n'es pas a l'origine de cette demande, ignore cet email.`;
-      const html = `
-        <div style="font-family: Arial, sans-serif; line-height:1.5; color:#111">
-          <h2>Connexion a FutureVoyance</h2>
-          <p>Clique sur le bouton ci-dessous pour te connecter.</p>
-          <p style="margin:24px 0;">
-            <a href="${url}" style="background:#7c3aed;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;">
-              Se connecter
-            </a>
-          </p>
-          <p>Ou copie ce lien:</p>
-          <p><a href="${url}">${url}</a></p>
-        </div>
-      `;
-      
-      console.log("[auth] Sending email via Resend:", {
-        from: fromEmail,
-        to: identifier,
-        subject,
-      });
-
-      const { error } = await resend.emails.send({
-        from: fromEmail,
-        to: identifier,
-        subject,
-        text,
-        html,
-      });
-      
-      if (error) {
-        console.error("[auth] Resend error:", error);
-        throw new Error(`Resend send failed: ${error.message}`);
-      }
-      
-      console.log("[auth] Email sent successfully to", identifier);
-    },
+    googleClientIdPrefix: googleClientId ? googleClientId.substring(0, 15) + "..." : "missing",
+    googleSecretPrefix: googleClientSecret ? googleClientSecret.substring(0, 10) + "..." : "missing",
+    nextAuthUrl: nextAuthUrl,
+    nextAuthUrlLength: nextAuthUrl.length,
   });
 
   if (!nextAuthSecret) {
@@ -81,16 +33,161 @@ export function getAuthOptions(): NextAuthOptions {
     throw new Error("NEXTAUTH_SECRET is required for NextAuth");
   }
 
+  const providers = [];
+
+  // Google OAuth
+  if (googleClientId && googleClientSecret) {
+    providers.push(
+      GoogleProvider({
+        clientId: googleClientId,
+        clientSecret: googleClientSecret,
+      })
+    );
+  }
+
+  // Facebook OAuth
+  if (facebookClientId && facebookClientSecret) {
+    providers.push(
+      FacebookProvider({
+        clientId: facebookClientId,
+        clientSecret: facebookClientSecret,
+      })
+    );
+  }
+
+  // Credentials Provider
+  providers.push(
+    CredentialsProvider({
+      id: "credentials",
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        const email = credentials.email.trim().toLowerCase();
+
+        try {
+          // Fetch user from Prisma
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          if (!user) {
+            return null;
+          }
+
+          if (!user.passwordHash) {
+            return null;
+          }
+
+          // Verify password
+          const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+          if (!isValid) {
+            return null;
+          }
+
+          // Return user (without passwordHash) - ensure email is not null
+          return {
+            id: user.id,
+            name: user.name || "",
+            email: user.email || email,
+            image: user.image || "",
+          };
+        } catch (error) {
+          console.error("[auth] Authorize error:", error);
+          return null;
+        }
+      },
+    })
+  );
+
   return {
+    debug: true,
     secret: nextAuthSecret,
     session: {
       strategy: "jwt",
     },
     pages: {
       signIn: "/login",
-      verifyRequest: "/login?check=1",
     },
-    adapter: UpstashRedisAdapter(redis),
-    providers: [provider],
+    adapter: PrismaAdapter(prisma),
+    providers,
+    logger: {
+      error(code, metadata) {
+        console.error("[NextAuth Error]", code, JSON.stringify(metadata, null, 2));
+      },
+      warn(code) {
+        console.warn("[NextAuth Warn]", code);
+      },
+      debug(code, metadata) {
+        console.log("[NextAuth Debug]", code, metadata);
+      },
+    },
+    events: {
+      async signIn(message) {
+        console.log("[NextAuth Event] signIn:", {
+          user: message.user?.email,
+          account: message.account?.provider,
+          isNewUser: message.isNewUser,
+        });
+      },
+      async signOut(message) {
+        console.log("[NextAuth Event] signOut:", message);
+      },
+      async createUser(message) {
+        console.log("[NextAuth Event] createUser:", {
+          userId: message.user.id,
+          email: message.user.email,
+        });
+      },
+      async linkAccount(message) {
+        console.log("[NextAuth Event] linkAccount:", {
+          userId: message.user.id,
+          provider: message.account.provider,
+        });
+      },
+      async session(message) {
+        console.log("[NextAuth Event] session:", {
+          email: message.session?.user?.email,
+        });
+      },
+    },
+    callbacks: {
+      async signIn({ user, account, profile }) {
+        console.log("[NextAuth Callback] signIn:", {
+          userId: user?.id,
+          userEmail: user?.email,
+          accountProvider: account?.provider,
+          accountType: account?.type,
+          profileEmail: (profile as { email?: string })?.email,
+        });
+        return true;
+      },
+      async jwt({ token, user, account }) {
+        // On first sign in, add user info to token
+        if (user) {
+          token.id = user.id;
+          token.email = user.email;
+          token.name = user.name;
+          token.picture = user.image;
+        }
+        return token;
+      },
+      async session({ session, token }) {
+        // Add user info to session
+        if (token && session.user) {
+          session.user.id = token.id as string;
+          session.user.email = token.email as string;
+          session.user.name = token.name as string;
+          session.user.image = token.picture as string;
+        }
+        return session;
+      },
+    },
   } satisfies NextAuthOptions;
 }

@@ -27,6 +27,7 @@ export async function GET(req: Request) {
     }
 
     try {
+        if (!redis) return NextResponse.json({ history: [] });
         const key = getUserHistoryKey(userKey);
         const data = await redis.lrange(key, 0, HISTORY_MAX_ITEMS - 1);
 
@@ -75,6 +76,10 @@ export async function POST(req: Request) {
             prompt: body.prompt,
             response: body.response,
         };
+
+        if (!redis) {
+            return NextResponse.json({ error: "Redis not configured" }, { status: 503 });
+        }
 
         const key = getUserHistoryKey(userKey);
 

@@ -35,16 +35,88 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## Authentication Env Vars
+## Authentication
 
-To enable magic-link login with Auth.js, set:
+This project uses **NextAuth.js v4** with multiple authentication methods:
 
-- `NEXTAUTH_SECRET`
-- `NEXTAUTH_URL`
-- `EMAIL_SERVER`
-- `EMAIL_FROM`
-- `UPSTASH_REDIS_URL`
-- `UPSTASH_REDIS_TOKEN`
+### Available Methods
+
+1. **Credentials (Email + Password)**
+   - Users can sign up and sign in with email and password
+   - Passwords are hashed with bcrypt (12 rounds)
+   - User data stored in Upstash Redis
+
+2. **Google OAuth** (optional)
+   - Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
+   - Configure in [Google Cloud Console](https://console.cloud.google.com/)
+
+3. **Facebook OAuth** (optional)
+   - Requires `FACEBOOK_CLIENT_ID` and `FACEBOOK_CLIENT_SECRET`
+   - Configure in [Facebook Developers](https://developers.facebook.com/)
+
+### Required Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in:
+
+```bash
+# Required for NextAuth
+NEXTAUTH_SECRET=your-secret-here  # Generate with: openssl rand -base64 32
+NEXTAUTH_URL=http://localhost:3000
+
+# Required for user storage
+UPSTASH_REDIS_REST_URL=https://your-redis-url.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-upstash-token
+
+# Optional: Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Optional: Facebook OAuth
+FACEBOOK_CLIENT_ID=your-facebook-app-id
+FACEBOOK_CLIENT_SECRET=your-facebook-app-secret
+```
+
+### Google OAuth Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable Google+ API
+4. Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
+5. Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google` (dev) and your production URL
+6. Copy Client ID and Client Secret to `.env.local`
+
+### Facebook OAuth Setup
+
+1. Go to [Facebook Developers](https://developers.facebook.com/)
+2. Create a new app or select existing
+3. Add "Facebook Login" product
+4. In Settings → Basic, copy App ID and App Secret
+5. In Facebook Login → Settings, add valid OAuth redirect URI: `http://localhost:3000/api/auth/callback/facebook`
+6. Copy credentials to `.env.local`
+
+### User Registration Endpoint
+
+- **POST** `/api/auth/register`
+- Validates username, email, password
+- Hashes password with bcrypt
+- Stores user in Redis: `user:{email}`
+- Returns user object without password hash
+
+### Security Features
+
+- Passwords hashed with bcrypt (12 rounds)
+- Never returns `passwordHash` in responses
+- Email validation
+- Username validation (3-30 chars, alphanumeric, dash, underscore)
+- Password minimum 8 characters
+- Terms & Conditions checkbox required on signup
+
+### Session Management
+
+- Strategy: JWT
+- Session stored in HTTP-only cookie
+- Automatic session refresh
+- Compatible with `callbackUrl` redirects
 
 Note: Upstash on Vercel often provides `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
 You can duplicate those values into `UPSTASH_REDIS_URL` / `UPSTASH_REDIS_TOKEN`.

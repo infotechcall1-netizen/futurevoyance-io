@@ -37,6 +37,7 @@ type HistoryItem = {
 };
 
 async function getHistory(userKey: string): Promise<HistoryItem[]> {
+  if (!redis) return [];
   try {
     const data = await redis.lrange(`fv:history:${userKey.toLowerCase()}`, 0, 49);
     return data.map((item) => {
