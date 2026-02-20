@@ -11,7 +11,7 @@ export type OracleVibration = {
   personal_resonance_steps?: string[];
 };
 
-const ORACLE_VIBRATIONS: Record<number, OracleVibration> = {
+export const ORACLE_VIBRATIONS: Record<number, OracleVibration> = {
   1: {
     vibration: 1,
     title: "Étincelle originelle",
@@ -188,7 +188,7 @@ function fmtDate(day: number, month: number, year: number): string {
  * Traditional digit-sum reduction of a DD/MM/YYYY date string.
  * Reduces to 1–9. Notes master numbers 11/22/33 if they appear.
  */
-function traditionalDateReduce(dateStr: string): { value: number; steps: string[] } {
+export function traditionalDateReduce(dateStr: string): { value: number; steps: string[] } {
   const digits = dateStr.replace(/\//g, "").split("");
   const steps: string[] = [dateStr];
 
@@ -213,7 +213,7 @@ function traditionalDateReduce(dateStr: string): { value: number; steps: string[
  * Life path from a DD/MM/YYYY date string.
  * Stops reduction at master numbers 11/22/33.
  */
-function lifePathFromDate(dateStr: string): {
+export function lifePathFromDate(dateStr: string): {
   traditional: number;
   reduced: number;
   steps: string[];

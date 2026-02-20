@@ -29,12 +29,14 @@ type OracleChatProps = {
   defaultPortalId?: PortalId;
   defaultModuleId?: string;
   lockPortal?: boolean;
+  firstName?: string;
 };
 
 export default function OracleChat({
   defaultPortalId,
   defaultModuleId,
   lockPortal = false,
+  firstName,
 }: OracleChatProps = {}) {
   const isDev = process.env.NODE_ENV === "development";
   const [prompt, setPrompt] = useState("");
@@ -167,7 +169,7 @@ export default function OracleChat({
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Écris ton intention..."
+            placeholder={firstName ? `Pose ta question, ${firstName}…` : "Écris ton intention…"}
             className="w-full border-b border-[#E5E3DD] bg-transparent px-2 py-6 text-center text-lg text-[#1A1A1A] placeholder:text-[#1A1A1A]/30 focus:border-[#7C3AED] focus:outline-none"
             disabled={loading}
           />

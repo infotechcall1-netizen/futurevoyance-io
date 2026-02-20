@@ -54,6 +54,9 @@ model User {
   phone         String?
   passwordHash  String?
 
+  // Prénom (distinct de name = prénom + nom complet)
+  firstName     String?
+
   // Données de naissance (astrologie)
   birthDate     DateTime?
   birthCity     String?
