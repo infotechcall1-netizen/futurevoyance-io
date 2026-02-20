@@ -579,10 +579,11 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
               <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Résonance</p>
               {compatResult && compatResult.score > 0 ? (
                 <>
-                  <p className="mt-3 font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#DB2777]">
-                    {compatResult.score}<span className="text-lg text-[#1A1A1A]/40">/10</span>
+                  <p className="mt-3 text-xs uppercase tracking-[0.28em] text-[#DB2777]/70">Nombre couple</p>
+                  <p className="mt-1 font-[family-name:var(--font-playfair)] text-4xl font-semibold text-[#DB2777]">
+                    {compatResult.coupleNumber}
                   </p>
-                  <h3 className="mt-2 font-[family-name:var(--font-playfair)] text-xl font-medium text-[#1A1A1A]">
+                  <h3 className="mt-2 font-[family-name:var(--font-playfair)] text-lg font-medium text-[#1A1A1A]">
                     {compatResult.title}
                   </h3>
                   <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#E5E3DD]">
@@ -591,6 +592,7 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
                       style={{ width: `${compatResult.score * 10}%` }}
                     />
                   </div>
+                  <p className="mt-1 text-right text-xs font-medium text-[#DB2777]/70">{compatResult.score}/10</p>
                 </>
               ) : (
                 <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]/60">

@@ -75,6 +75,7 @@ export function vibrationTitle(vibration: number): string {
 
 export type NameCompatibilityResult = {
   score: number;       // 1–10
+  coupleNumber: number; // le nombre du couple (1-9, 11, 22, 33)
   title: string;
   description: string;
   advice: string;
@@ -82,43 +83,95 @@ export type NameCompatibilityResult = {
   vib2: number;
 };
 
-/** Compatibility table between vibration pairs (simplified) */
-const VIBE_COMPAT: Record<string, { score: number; title: string; description: string; advice: string }> = {
-  // Same vibration
-  "same": {
+/**
+ * Table du nombre couple — couvre TOUS les résultats possibles (1-9, 11, 22, 33).
+ * Algorithme : vib1 + vib2 → réduit → nombre couple → lecture unique.
+ * Inspiré de futurevoyance.com/compatibilite-amoureuse-numerologie-prenoms/
+ */
+const COUPLE_READINGS: Record<number, { score: number; title: string; description: string; advice: string }> = {
+  1: {
     score: 7,
-    title: "Miroir vibratoire",
-    description: "Vous partagez la même énergie fondamentale. Une compréhension intuitive profonde, mais attention au risque d'amplifier les mêmes patterns.",
-    advice: "Cultivez vos différences pour vous enrichir mutuellement.",
+    title: "Couple Pionnier",
+    description: "Votre union vibre sur la fréquence des débuts et de l'indépendance. Deux êtres forts qui peuvent s'inspirer mutuellement à condition de laisser de l'espace à l'autre.",
+    advice: "Cultivez vos projets individuels autant que vos projets communs — votre force naît de votre liberté respective.",
   },
-  // Complementary pairs (1+2, 3+6, 4+8, 5+9, 7+11, 22+33)
-  "1-2": { score: 9, title: "Leader & Soutien", description: "L'élan du 1 trouve dans le 2 un terrain d'atterrissage parfait. Vous vous complétez naturellement.", advice: "Laissez le 1 initier, le 2 affiner — ensemble vous accomplissez." },
-  "3-6": { score: 9, title: "Créativité & Harmonie", description: "L'expression du 3 s'épanouit dans l'espace chaleureux que crée le 6. Une résonance artistique et affective rare.", advice: "Créez ensemble, partagez vos créations avec le monde." },
-  "4-8": { score: 9, title: "Fondation & Maîtrise", description: "La structure du 4 et la puissance du 8 construisent ensemble quelque chose qui dure. Confiance réciproque.", advice: "Visez des projets concrets et durables ensemble." },
-  "5-9": { score: 8, title: "Aventure & Sagesse", description: "La liberté du 5 et la profondeur du 9 créent un voyage riche. Ensemble vous explorez et transmutez.", advice: "Laissez la curiosité du 5 guider, la sagesse du 9 intégrer." },
-  "1-9": { score: 7, title: "Début & Fin", description: "L'alpha et l'oméga. Vous représentez ensemble un cycle complet — une relation de transformation mutuelle.", advice: "Honorez vos différences de rythme comme une richesse." },
-  "2-4": { score: 8, title: "Alliance douce", description: "La sensibilité du 2 trouve dans la stabilité du 4 un ancrage précieux. Une paix naturelle.", advice: "Construisez votre espace commun avec patience." },
-  "3-5": { score: 8, title: "Joie & Mouvement", description: "Deux énergies légères qui s'amplifient mutuellement. Créativité, aventure et rires au programme.", advice: "Donnez aussi de la profondeur à votre lien." },
-  "6-8": { score: 7, title: "Soin & Puissance", description: "L'amour du 6 et la force du 8 peuvent beaucoup accomplir. Attention à l'équilibre des rôles.", advice: "Veillez à ce que le 6 ne s'efface pas devant le 8." },
-  "7-11": { score: 9, title: "Mystère & Vision", description: "Deux âmes profondes qui se reconnaissent. Une connexion intuitive presque télépathique.", advice: "Honorez votre besoin de silence et d'espace chacun." },
-  "22-33": { score: 10, title: "Architectes du Monde", description: "Une rencontre de nombres maîtres. Ensemble, vous portez le potentiel de bâtir quelque chose de transcendant.", advice: "Canalisez cette énergie immense vers une vision commune." },
-};
-
-function compatKey(v1: number, v2: number): string {
-  if (v1 === v2) return "same";
-  const [a, b] = [Math.min(v1, v2), Math.max(v1, v2)];
-  return `${a}-${b}`;
-}
-
-const DEFAULT_COMPAT = {
-  score: 6,
-  title: "Vibrations distinctes",
-  description: "Vos énergies sont différentes mais complémentaires à leur façon. La rencontre crée une dynamique unique.",
-  advice: "Explorez ce que l'autre éveille en vous — c'est votre zone de croissance.",
+  2: {
+    score: 9,
+    title: "Couple Fusionnel",
+    description: "Le 2 est la vibration du couple par excellence. Écoute, douceur, complémentarité — votre lien repose sur une harmonie rare et une compréhension intuitive profonde.",
+    advice: "Chérissez ces moments de silence partagé. Votre connexion se nourrit de la qualité de votre présence l'un à l'autre.",
+  },
+  3: {
+    score: 8,
+    title: "Couple Créatif",
+    description: "La joie, la communication et l'expression sont au cœur de votre relation. Ensemble, vous attirez la lumière et créez de la beauté autour de vous.",
+    advice: "Gardez vivant le plaisir de vous surprendre — improvisez, riez, créez ensemble régulièrement.",
+  },
+  4: {
+    score: 7,
+    title: "Couple Bâtisseur",
+    description: "Votre lien est solide comme la pierre. Fidélité, engagement et sens du concret définissent votre couple. Vous construisez ensemble quelque chose qui dure.",
+    advice: "Introduisez de la légèreté et de la spontanéité pour éviter la routine — la stabilité est une force, pas une cage.",
+  },
+  5: {
+    score: 7,
+    title: "Couple Aventurier",
+    description: "Le changement, la liberté et l'intensité marquent votre relation. Une passion vive et une attraction magnétique — mais vous aurez besoin de vous ancrer.",
+    advice: "Trouvez ensemble un socle stable tout en honorant votre besoin commun de mouvement et de nouveauté.",
+  },
+  6: {
+    score: 9,
+    title: "Couple Harmonieux",
+    description: "L'amour, la famille et la beauté sont au centre de votre vibration commune. Votre relation rayonne d'une chaleur qui nourrit tous ceux qui vous entourent.",
+    advice: "Prenez soin de votre cocon tout en vous ouvrant au monde — votre amour a quelque chose à offrir au-delà de vous deux.",
+  },
+  7: {
+    score: 7,
+    title: "Couple Mystique",
+    description: "Votre lien est profond, introspectif et porté par une quête commune de sens. Vous vous reconnaissez dans l'âme plutôt que dans l'apparence.",
+    advice: "Acceptez les silences et les retraits de l'autre — votre amour se nourrit de profondeur, pas de surface.",
+  },
+  8: {
+    score: 7,
+    title: "Couple Puissant",
+    description: "L'ambition, le leadership et la maîtrise caractérisent votre union. Ensemble vous pouvez accomplir de grandes choses, à condition d'éviter la compétition.",
+    advice: "Définissez clairement vos rôles et célébrez les victoires de l'autre — votre force devient décuplée quand elle est unifiée.",
+  },
+  9: {
+    score: 8,
+    title: "Couple Universel",
+    description: "Votre relation vibre sur la fréquence de la sagesse, de la générosité et de l'accomplissement. Un lien marqué par la transformation et le dépassement.",
+    advice: "Gardez de la place pour vos chemins individuels — votre union s'enrichit de ce que chacun vit et transmet.",
+  },
+  11: {
+    score: 9,
+    title: "Couple Vision",
+    description: "Le nombre maître 11 illumine votre union. Une connexion rare, presque télépathique, portée par une sensibilité et une intuition communes extraordinaires.",
+    advice: "Ancrez votre lien dans le quotidien concret — l'idéal se construit aussi avec les petites choses du jour.",
+  },
+  22: {
+    score: 10,
+    title: "Couple Architecte",
+    description: "Le plus puissant des nombres maîtres préside à votre union. Ensemble vous pouvez bâtir quelque chose de transcendant — une famille, une œuvre, un héritage.",
+    advice: "Canalisez cette énergie immense avec discernement. Votre potentiel ensemble ne connaît presque pas de limites.",
+  },
+  33: {
+    score: 9,
+    title: "Couple Enseignant",
+    description: "Le maître-enseignant préside à votre lien. Votre relation est marquée par la compassion, le service et un amour qui dépasse vos deux personnes.",
+    advice: "Prenez soin de ne pas vous oublier dans le don aux autres — votre union se ressource dans l'amour reçu autant que donné.",
+  },
 };
 
 /**
- * Calculate compatibility between two first names.
+ * Calculate compatibility between two first names using the "couple number" method.
+ *
+ * Algorithm (same as futurevoyance.com):
+ *   1. vib1 = Pythagorean sum of name1 (reduced, master numbers preserved)
+ *   2. vib2 = Pythagorean sum of name2 (reduced, master numbers preserved)
+ *   3. raw  = vib1 + vib2
+ *   4. coupleNumber = reduceMaster(raw) → always 1-9, 11, 22, or 33
+ *   5. Look up coupleNumber in COUPLE_READINGS → unique result every time
  */
 export function firstNameCompatibility(name1: string, name2: string): NameCompatibilityResult {
   const vib1 = firstNameVibration(name1);
@@ -127,6 +180,7 @@ export function firstNameCompatibility(name1: string, name2: string): NameCompat
   if (vib1 === 0 || vib2 === 0) {
     return {
       score: 0,
+      coupleNumber: 0,
       title: "—",
       description: "Entre deux prénoms pour découvrir votre compatibilité.",
       advice: "",
@@ -135,8 +189,8 @@ export function firstNameCompatibility(name1: string, name2: string): NameCompat
     };
   }
 
-  const key = compatKey(vib1, vib2);
-  const compat = VIBE_COMPAT[key] ?? DEFAULT_COMPAT;
+  const coupleNumber = reduceMaster(vib1 + vib2);
+  const reading = COUPLE_READINGS[coupleNumber] ?? COUPLE_READINGS[9]!;
 
-  return { ...compat, vib1, vib2 };
+  return { ...reading, coupleNumber, vib1, vib2 };
 }
