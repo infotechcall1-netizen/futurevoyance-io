@@ -144,6 +144,27 @@ export default async function MonOraclePage() {
         )}
       </section>
 
+      {/* ── Thème Astral ── */}
+      <section className="space-y-4 border-l-2 border-[#7C3AED] bg-[#FBFAF7] px-6 py-8">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">☉</span>
+          <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-[#7C3AED]">
+            Thème Astral
+          </h2>
+        </div>
+        <p className="text-sm leading-relaxed text-[#1A1A1A]/60">
+          Découvre la carte du ciel au moment de ta naissance : ton ascendant,
+          tes positions planétaires et ton chemin de lumière.
+        </p>
+        <Link
+          href="/mon-oracle/astro"
+          className="mt-2 inline-block rounded-sm bg-[#7C3AED] px-8 py-3.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#6D28D9]"
+        >
+          Voir mon thème astral →
+        </Link>
+      </section>
+
+      {/* ── Rituels & Pratiques ── */}
       <section className="space-y-4 border-l-2 border-[#C9A961] bg-[#FBFAF7] px-6 py-8 opacity-70">
         <div className="flex items-center gap-2">
           <div className="size-2 rounded-full bg-[#C9A961] animate-pulse" />

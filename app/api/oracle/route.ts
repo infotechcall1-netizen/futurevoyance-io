@@ -10,6 +10,10 @@ import {
   getGoogleCredentialsEnvPresence,
   loadGoogleServiceAccountCredentials,
 } from "@/lib/oracle/credentials";
+import { getServerAuthSession } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import { generateNatalChart } from "@/lib/astrology/engine";
+import { buildNatalContext } from "@/lib/astrology/context";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -139,8 +143,13 @@ Style:
 - Rituel: geste symbolique de transmutation.
 `;
 
-function buildSystemPrompt(isPremium: boolean): string {
-  return BASE_SYSTEM_PROMPT + (isPremium ? PREMIUM_ALCHEMY_INSTRUCTIONS : FREE_JSON_SKELETON);
+function buildSystemPrompt(isPremium: boolean, natalContext?: string): string {
+  let prompt = BASE_SYSTEM_PROMPT;
+  if (natalContext) {
+    prompt += "\n" + natalContext + "\n";
+  }
+  prompt += isPremium ? PREMIUM_ALCHEMY_INSTRUCTIONS : FREE_JSON_SKELETON;
+  return prompt;
 }
 
 const FALLBACK_ESSENTIEL = "Reviens à l'essentiel : une seule priorité, maintenant.";
@@ -301,7 +310,45 @@ export async function POST(req: Request) {
 
   const isPremium = isPremiumAlchemyModule(module_id);
   const schema = isPremium ? premiumOracleResponseSchema : oracleResponseSchema;
-  const systemPrompt = buildSystemPrompt(isPremium);
+
+  // ── Fetch natal astrology context if user is authenticated ──
+  let natalContext: string | undefined;
+  try {
+    const session = await getServerAuthSession();
+    if (session?.user?.email) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: {
+          name: true,
+          birthDate: true,
+          birthCity: true,
+          birthLat: true,
+          birthLon: true,
+          birthTimezone: true,
+        },
+      });
+      if (user?.birthDate && user.birthLat != null && user.birthLon != null) {
+        const chart = generateNatalChart(
+          user.name ?? "",
+          user.birthDate,
+          user.birthLat,
+          user.birthLon,
+          user.birthCity ?? "",
+          user.birthTimezone ?? "UTC"
+        );
+        natalContext = buildNatalContext(chart);
+        console.log(JSON.stringify({
+          oracle_astro_context: true,
+          rising_sign: chart.risingSign,
+          sun_sign: chart.sunSign,
+        }));
+      }
+    }
+  } catch (err) {
+    console.warn("[oracle] Failed to load natal context:", err);
+  }
+
+  const systemPrompt = buildSystemPrompt(isPremium, natalContext);
 
   console.log(JSON.stringify({
     oracle_provider: "vertex",

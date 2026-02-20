@@ -53,6 +53,14 @@ model User {
   image         String?
   phone         String?
   passwordHash  String?
+
+  // Données de naissance (astrologie)
+  birthDate     DateTime?
+  birthCity     String?
+  birthLat      Float?
+  birthLon      Float?
+  birthTimezone String?
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
