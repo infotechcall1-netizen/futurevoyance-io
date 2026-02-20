@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import OracleChat from "./OracleChat";
+import HeroOracle from "./HeroOracle";
 import PortalCard from "./PortalCard";
 import VibrationCalcBlock from "./VibrationCalcBlock";
 import DottedSurface from "./ui/DottedSurface";
@@ -143,6 +144,11 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
   // ── Render ──────────────────────────────────────────────────────────────
   return (
     <div className="space-y-24">
+
+      {/* ═══════════════════════════════════════════════════════
+          HERO ORACLE — "Pose ta question. Découvre la vérité."
+      ════════════════════════════════════════════════════════ */}
+      <HeroOracle />
 
       {/* ═══════════════════════════════════════════════════════
           §1 — HERO + Oracle du jour
