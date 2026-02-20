@@ -93,10 +93,10 @@ export default function SiteHeader() {
         {/* Desktop Actions */}
         <div className="hidden items-center gap-3 md:flex">
           <Link
-            href="/mon-oracle"
+            href="/mon-espace"
             className="min-h-[44px] flex items-center rounded-sm border border-[#7C3AED] bg-[#7C3AED] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#6D28D9]"
           >
-            Mon Oracle
+            Mon Espace
           </Link>
           {userEmail ? (
             <>
@@ -113,7 +113,7 @@ export default function SiteHeader() {
             </>
           ) : (
             <Link
-              href="/login?callbackUrl=/mon-oracle"
+              href="/login?callbackUrl=/mon-espace"
               className="min-h-[44px] flex items-center rounded-sm border border-[#E5E3DD] px-4 py-2.5 text-sm font-medium text-[#1A1A1A]/70 transition-all hover:border-[#1A1A1A]/30 hover:text-[#1A1A1A]"
             >
               Se connecter
@@ -167,11 +167,11 @@ export default function SiteHeader() {
               {/* Mobile Actions */}
               <div className="flex flex-col gap-3 border-t border-[#E5E3DD] pt-6">
                 <Link
-                  href="/mon-oracle"
+                  href="/mon-espace"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex min-h-[48px] items-center justify-center rounded-sm border border-[#7C3AED] bg-[#7C3AED] px-5 py-3 text-base font-medium text-white transition-all hover:bg-[#6D28D9]"
                 >
-                  Mon Oracle
+                  Mon Espace
                 </Link>
                 {userEmail ? (
                   <>
@@ -189,7 +189,7 @@ export default function SiteHeader() {
                   </>
                 ) : (
                   <Link
-                    href="/login?callbackUrl=/mon-oracle"
+                    href="/login?callbackUrl=/mon-espace"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex min-h-[48px] items-center justify-center rounded-sm border border-[#E5E3DD] px-5 py-3 text-base font-medium text-[#1A1A1A]/70 transition-all hover:border-[#1A1A1A]/30 hover:text-[#1A1A1A]"
                   >
