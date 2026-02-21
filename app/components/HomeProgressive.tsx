@@ -350,47 +350,59 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
                 </div>
               </div>
 
-              {/* 2-card grid — résultat */}
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Card 2 — chemin de vie + résonance */}
-                <div className="fv-card p-6 text-left">
-                  <p className="fv-kicker text-xs text-[#262626]/70">Oracle personnel</p>
-                  {personalOracle && lifePath !== null ? (
-                    <>
-                      <p className="fv-title mt-3 text-3xl font-semibold text-[#262626]">
-                        {personalOracle.vibration}
-                      </p>
-                      <h3 className="fv-title mt-2 text-xl font-medium text-[#262626]">
-                        {personalOracle.title}
-                      </h3>
-                      <p className="mt-1 text-xs uppercase tracking-[0.28em] text-[#1A1A1A]/50">
-                        Chemin de vie · {lifePath}
-                      </p>
-                      <p className="mt-2 text-sm font-medium uppercase tracking-wider text-[#262626]/60">
-                        {personalOracle.keyword}
-                      </p>
-                    </>
-                  ) : (
-                    <p className="fv-muted mt-3 text-sm leading-relaxed">
-                      Entre ta date de naissance pour révéler ta résonance personnelle du jour.
-                    </p>
-                  )}
+              {/* 3D Card Stack — Oracle personnel + Message */}
+              {personalOracle && lifePath !== null ? (
+                <motion.div
+                  key="personal-oracle-stack"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                >
+                  <CardStack3D
+                    cards={[
+                      {
+                        id: "oracle-personnel",
+                        kicker: "Oracle personnel",
+                        content: (
+                          <div className="flex-1 flex flex-col justify-center items-center text-center">
+                            <p className="fv-title text-5xl sm:text-6xl font-semibold text-[#262626] mb-4">
+                              {personalOracle.vibration}
+                            </p>
+                            <h3 className="fv-title text-2xl sm:text-3xl font-medium text-[#262626] mb-2">
+                              {personalOracle.title}
+                            </h3>
+                            <p className="text-xs uppercase tracking-[0.28em] text-[#262626]/50 mb-3">
+                              Chemin de vie · {lifePath}
+                            </p>
+                            <p className="text-sm font-medium uppercase tracking-wider text-[#262626]/60">
+                              {personalOracle.keyword}
+                            </p>
+                          </div>
+                        ),
+                      },
+                      {
+                        id: "ton-message",
+                        kicker: "Ton message",
+                        content: (
+                          <div className="flex-1 flex flex-col justify-center">
+                            <p className="text-lg sm:text-xl leading-relaxed text-[#262626]/80">
+                              {personalOracle.personalMessage}
+                            </p>
+                          </div>
+                        ),
+                      },
+                    ]}
+                    showHint={true}
+                    containerHeight="h-[420px] sm:h-[520px]"
+                  />
+                </motion.div>
+              ) : (
+                <div className="fv-card p-6 text-center max-w-md mx-auto">
+                  <p className="fv-muted text-sm leading-relaxed">
+                    Entre ta date de naissance pour révéler ta résonance personnelle du jour.
+                  </p>
                 </div>
-
-                {/* Card 3 — message personnel */}
-                <div className="fv-card p-6 text-left">
-                  <p className="fv-kicker text-xs text-[#262626]/70">Ton message</p>
-                  {personalOracle ? (
-                    <p className="mt-3 text-sm leading-relaxed text-[#262626]">
-                      {personalOracle.personalMessage}
-                    </p>
-                  ) : (
-                    <p className="fv-muted mt-3 text-sm leading-relaxed">
-                      Ton message personnel apparaîtra ici.
-                    </p>
-                  )}
-                </div>
-              </div>
+              )}
 
               {/* Life path calc block */}
               {personalOracle?.life_path_steps && (
