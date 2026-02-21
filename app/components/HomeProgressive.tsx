@@ -708,30 +708,46 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
               Chaque porte ouvre un angle différent de ta réalité
             </motion.p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="relative grid gap-6 md:grid-cols-2">
+            {/* Decorative cross separator */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:block z-0">
+              <div className="relative w-12 h-12">
+                <div className="absolute top-1/2 left-0 right-0 h-px bg-[#E5E3DD]" />
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-[#E5E3DD]" />
+              </div>
+            </div>
+
             <PortalCard
               href="/comprendre"
               title="Comprendre"
               subtitle="Numérologie, cycles, archétypes et lignes de force de ton chemin."
               accentColor="#262626"
+              romanNumeral="I"
+              delay={0}
             />
             <PortalCard
               href="/aimer"
               title="Aimer"
               subtitle="Compatibilités, résonances de prénoms et signatures affectives."
               accentColor="#262626"
+              romanNumeral="II"
+              delay={100}
             />
             <PortalCard
               href="/prevoir"
               title="Prévoir"
               subtitle="Horoscopes, périodes charnières et fenêtres d&apos;opportunité."
               accentColor="#262626"
+              romanNumeral="III"
+              delay={200}
             />
             <PortalCard
               href="/recevoir"
               title="Recevoir"
               subtitle="Tirages intuitifs, messages symboliques et guidance en temps réel."
               accentColor="#262626"
+              romanNumeral="IV"
+              delay={300}
             />
           </div>
         </div>
