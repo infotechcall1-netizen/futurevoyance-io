@@ -627,54 +627,71 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
             </motion.div>
           </div>
 
-          <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
-            {/* Score card */}
-            <motion.div {...fadeUp(0.4)} className="fv-card p-6 text-center">
-              <p className="fv-kicker text-xs text-[#262626]/70">Résonance</p>
-              {compatResult && compatResult.score > 0 ? (
-                <>
-                  <p className="mt-3 text-xs uppercase tracking-[0.28em] text-[#262626]/70">Nombre couple</p>
-                  <p className="fv-title mt-1 text-4xl font-semibold text-[#262626]">
-                    {compatResult.coupleNumber}
-                  </p>
-                  <h3 className="fv-title mt-2 text-lg font-medium text-[#262626]">
-                    {compatResult.title}
-                  </h3>
-                  <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#E5E3DD]">
-                    <div
-                      className="h-full rounded-full bg-[#262626] transition-all duration-700"
-                      style={{ width: `${compatResult.score * 10}%` }}
-                    />
-                  </div>
-                  <p className="mt-1 text-right text-xs font-medium text-[#262626]/70">{compatResult.score}/10</p>
-                </>
-              ) : (
-                <p className="fv-muted mt-3 text-sm leading-relaxed">
-                  Entre deux prénoms pour révéler votre score de compatibilité vibratoire.
-                </p>
-              )}
+          {/* 3D Card Stack — Résonance + Lecture */}
+          {compatResult && compatResult.score > 0 ? (
+            <motion.div
+              key="compat-stack"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <CardStack3D
+                cards={[
+                  {
+                    id: "resonance",
+                    kicker: "Résonance",
+                    content: (
+                      <div className="flex-1 flex flex-col justify-center items-center text-center">
+                        <p className="text-xs uppercase tracking-[0.28em] text-[#262626]/70 mb-2">Nombre couple</p>
+                        <p className="fv-title text-5xl sm:text-6xl font-semibold text-[#262626] mb-4">
+                          {compatResult.coupleNumber}
+                        </p>
+                        <h3 className="fv-title text-xl sm:text-2xl font-medium text-[#262626] mb-6">
+                          {compatResult.title}
+                        </h3>
+                        <div className="w-full max-w-xs">
+                          <div className="h-2 w-full overflow-hidden rounded-full bg-[#E5E3DD]">
+                            <div
+                              className="h-full rounded-full bg-[#262626] transition-all duration-700"
+                              style={{ width: `${compatResult.score * 10}%` }}
+                            />
+                          </div>
+                          <p className="mt-2 text-right text-sm font-medium text-[#262626]/70">
+                            {compatResult.score}/10
+                          </p>
+                        </div>
+                      </div>
+                    ),
+                  },
+                  {
+                    id: "lecture",
+                    kicker: "Lecture",
+                    content: (
+                      <div className="flex-1 flex flex-col justify-center items-center text-center">
+                        <p className="text-lg sm:text-xl leading-relaxed text-[#262626]/80 mb-6">
+                          {compatResult.description}
+                        </p>
+                        <Link
+                          href="/mon-espace/compatibilite"
+                          className="inline-block text-sm font-semibold text-[#262626] underline underline-offset-4 hover:text-[#111] transition-colors"
+                        >
+                          Compatibilité des signes astraux →
+                        </Link>
+                      </div>
+                    ),
+                  },
+                ]}
+                showHint={true}
+                containerHeight="h-[420px] sm:h-[520px]"
+              />
             </motion.div>
-
-            {/* Description card */}
-            <motion.div {...fadeUp(0.5)} className="fv-card p-6 text-center">
-              <p className="fv-kicker text-xs text-[#262626]/70">Lecture</p>
-              {compatResult && compatResult.score > 0 ? (
-                <>
-                  <p className="mt-3 text-sm leading-relaxed text-[#262626]">{compatResult.description}</p>
-                  <Link
-                    href="/mon-espace/compatibilite"
-                    className="mt-4 inline-block text-xs font-semibold text-[#262626] underline underline-offset-4 hover:text-[#111] transition-colors"
-                  >
-                    Compatibilité des signes astraux →
-                  </Link>
-                </>
-              ) : (
-                <p className="fv-muted mt-3 text-sm leading-relaxed">
-                  Ta lecture vibratoire apparaîtra ici.
-                </p>
-              )}
-            </motion.div>
-          </div>
+          ) : (
+            <div className="fv-card p-6 text-center max-w-md mx-auto">
+              <p className="fv-muted text-sm leading-relaxed">
+                Entre deux prénoms pour révéler votre score de compatibilité vibratoire.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
