@@ -10,6 +10,7 @@ import PortalCard from "./PortalCard";
 import VibrationCalcBlock from "./VibrationCalcBlock";
 import DottedSurface from "./ui/DottedSurface";
 import DailyCardStack from "./DailyCardStack";
+import CardStack3D, { type Card3DData } from "./CardStack3D";
 import type { OracleVibration } from "../lib/oracle";
 import { oraclePersonal, lifePathFromDate } from "../lib/oracle";
 import { firstNameVibration, vibrationKeyword, vibrationTitle, firstNameCompatibility } from "@/lib/numerology";
@@ -255,38 +256,52 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
             </button>
           </motion.div>
 
-          {/* Vibration result — appears when name is typed */}
+          {/* Vibration result — 3D card stack appears when name is typed */}
           <AnimatePresence>
             {nameVib > 0 && (
               <motion.div
-                key="name-vib"
+                key="name-vib-stack"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="mx-auto grid max-w-sm grid-cols-1 gap-6 md:max-w-none md:grid-cols-3"
               >
-                <div className="fv-card p-6 text-left">
-                  <p className="fv-kicker text-xs text-[#262626]/70">Vibration · {nameVib}</p>
-                  <p className="fv-title mt-3 text-3xl font-semibold text-[#262626]">
-                    {nameVib}
-                  </p>
-                  <h3 className="fv-title mt-2 text-xl font-medium text-[#262626]">
-                    {nameTitle}
-                  </h3>
-                  <p className="mt-2 text-sm font-medium uppercase tracking-wider text-[#262626]/60">
-                    {nameKeyword}
-                  </p>
-                </div>
-
-                <div className="fv-card p-6 text-left md:col-span-2">
-                  <p className="fv-kicker text-xs text-[#262626]/70">Ce que cela révèle</p>
-                  <p className="mt-3 text-sm leading-relaxed text-[#262626]">
-                    Le prénom <span className="font-medium">{debouncedFirstName}</span> porte une vibration{" "}
-                    <span className="font-medium text-[#262626]">{nameVib}</span>. Chaque lettre contribue à cette
-                    fréquence qui influence ton rapport au monde et ta façon de te manifester.
-                  </p>
-                </div>
+                <CardStack3D
+                  cards={[
+                    {
+                      id: "vibration",
+                      kicker: `Vibration · ${nameVib}`,
+                      content: (
+                        <div className="flex-1 flex flex-col justify-center items-center text-center">
+                          <p className="fv-title text-5xl sm:text-6xl font-semibold text-[#262626] mb-4">
+                            {nameVib}
+                          </p>
+                          <h3 className="fv-title text-2xl sm:text-3xl font-medium text-[#262626] mb-3">
+                            {nameTitle}
+                          </h3>
+                          <p className="text-sm font-medium uppercase tracking-wider text-[#262626]/60">
+                            {nameKeyword}
+                          </p>
+                        </div>
+                      ),
+                    },
+                    {
+                      id: "revelation",
+                      kicker: "Ce que cela révèle",
+                      content: (
+                        <div className="flex-1 flex flex-col justify-center">
+                          <p className="text-lg sm:text-xl leading-relaxed text-[#262626]/80">
+                            Le prénom <span className="font-medium">{debouncedFirstName}</span> porte une vibration{" "}
+                            <span className="font-medium text-[#262626]">{nameVib}</span>. Chaque lettre contribue à
+                            cette fréquence qui influence ton rapport au monde et ta façon de te manifester.
+                          </p>
+                        </div>
+                      ),
+                    },
+                  ]}
+                  showHint={true}
+                  containerHeight="h-[420px] sm:h-[520px]"
+                />
               </motion.div>
             )}
           </AnimatePresence>
