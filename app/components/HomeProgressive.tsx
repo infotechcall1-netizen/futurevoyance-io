@@ -9,6 +9,7 @@ import HeroOracle from "./HeroOracle";
 import PortalCard from "./PortalCard";
 import VibrationCalcBlock from "./VibrationCalcBlock";
 import DottedSurface from "./ui/DottedSurface";
+import DailyCardStack from "./DailyCardStack";
 import type { OracleVibration } from "../lib/oracle";
 import { oraclePersonal, lifePathFromDate } from "../lib/oracle";
 import { firstNameVibration, vibrationKeyword, vibrationTitle, firstNameCompatibility } from "@/lib/numerology";
@@ -211,28 +212,8 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
             className="fv-divider mx-auto mt-10 w-24"
           />
 
-          {/* 3-card grid — same structure as DailyVibrationCombined */}
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            <motion.div {...fadeUp(0.5)} className="fv-card p-6 text-left">
-              <p className="fv-kicker text-xs text-[#262626]/70">Ambiance du jour</p>
-              <h3 className="fv-title mt-3 text-xl font-medium text-[#262626]">
-                {initialDayOracle.title}
-              </h3>
-              <p className="mt-2 text-sm font-medium uppercase tracking-wider text-[#262626]/60">
-                {initialDayOracle.keyword}
-              </p>
-            </motion.div>
-
-            <motion.div {...fadeUp(0.6)} className="fv-card p-6 text-left">
-              <p className="fv-kicker text-xs text-[#262626]/70">Message du jour</p>
-              <p className="mt-3 text-sm leading-relaxed text-[#262626]">{initialDayOracle.dailyMessage}</p>
-            </motion.div>
-
-            <motion.div {...fadeUp(0.7)} className="fv-card p-6 text-left">
-              <p className="fv-kicker text-xs text-[#262626]/70">Rituel du jour</p>
-              <p className="mt-3 text-sm leading-relaxed text-[#262626]">{initialDayOracle.dailyRitual}</p>
-            </motion.div>
-          </div>
+          {/* 3D Card Stack — replaces grid */}
+          <DailyCardStack dayOracle={initialDayOracle} />
         </div>
       </section>
 
