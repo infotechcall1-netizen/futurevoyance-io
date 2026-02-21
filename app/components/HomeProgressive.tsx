@@ -49,17 +49,21 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
 
   // ── State ──────────────────────────────────────────────────────────────
   const [firstName, setFirstName] = useState("");
+  const [firstNameInput, setFirstNameInput] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [birthDateInput, setBirthDateInput] = useState("");
   const [cityQuery, setCityQuery] = useState("");
   const [citySuggestions, setCitySuggestions] = useState<GeocodingResult[]>([]);
   const [cityLoading, setCityLoading] = useState(false);
   const [ascendantSign, setAscendantSign] = useState<string | null>(null);
   const [ascendantSymbol, setAscendantSymbol] = useState<string | null>(null);
-  const [ascendantColor, setAscendantColor] = useState<string>(ASTRO_COLORS.gold);
+  const [ascendantColor, setAscendantColor] = useState<string>("#262626");
 
   // Compatibility teaser
   const [compatName1, setCompatName1] = useState("");
   const [compatName2, setCompatName2] = useState("");
+  const [compatName1Input, setCompatName1Input] = useState("");
+  const [compatName2Input, setCompatName2Input] = useState("");
 
   // ── Derived values ──────────────────────────────────────────────────────
   const debouncedFirstName = useDebounce(firstName, 400);
@@ -74,6 +78,19 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
   // Life path
   const [personalOracle, setPersonalOracle] = useState<OracleVibration | null>(null);
   const [lifePath, setLifePath] = useState<number | null>(null);
+
+  const handleFirstNameValidate = () => {
+    setFirstName(firstNameInput.trim());
+  };
+
+  const handleBirthDateValidate = () => {
+    setBirthDate(birthDateInput);
+  };
+
+  const handleCompatibilityValidate = () => {
+    setCompatName1(compatName1Input.trim());
+    setCompatName2(compatName2Input.trim());
+  };
 
   useEffect(() => {
     if (!birthDate) {
@@ -121,7 +138,7 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
       setAscendantSign(sign.french);
       setAscendantSymbol(sign.symbol);
       const elementKey = sign.element as keyof typeof ASTRO_COLORS;
-      setAscendantColor(ASTRO_COLORS[elementKey] ?? ASTRO_COLORS.gold);
+      setAscendantColor(ASTRO_COLORS[elementKey] ?? "#262626");
     } catch {
       // silently ignore
     }
@@ -143,7 +160,7 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
 
   // ── Render ──────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-24">
+    <div className="fv-page space-y-24">
 
       {/* ═══════════════════════════════════════════════════════
           HERO ORACLE — "Pose ta question. Découvre la vérité."
@@ -154,28 +171,28 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
           §1 — HERO + Oracle du jour
           Same layout as DailyVibrationCombined's hero section
       ════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden px-6 py-20 text-center bg-gradient-to-b from-[#FBFAF7]/80 to-transparent">
+      <section className="relative overflow-hidden px-6 py-20 text-center">
         <DottedSurface className="absolute inset-0 -z-10 opacity-30 blur-[0.2px]" ariaHidden />
         <div className="relative z-10 mx-auto max-w-5xl">
 
           {/* Date label */}
-          <motion.p {...fadeIn(0)} className="text-xs uppercase tracking-[0.35em] text-[#C9A961]/80">
+          <motion.p {...fadeIn(0)} className="fv-kicker text-xs text-[#262626]/70">
             Aujourd&apos;hui
           </motion.p>
 
           {/* Big Playfair date — same as DailyVibrationCombined */}
           <motion.h1
             {...fadeUp(0.1)}
-            className="mt-4 font-[family-name:var(--font-playfair)] text-[#1A1A1A]"
+            className="fv-title mt-4 text-[#262626]"
             style={{ fontSize: "clamp(2.5rem, 5vw + 1rem, 4.5rem)" }}
           >
             {todayLabel}
           </motion.h1>
 
           {/* Vibration sub-line */}
-          <motion.p {...fadeIn(0.2)} className="mt-6 text-base font-light text-[#1A1A1A]/70">
+          <motion.p {...fadeIn(0.2)} className="fv-muted mt-6 text-base font-light">
             Vibration du jour :{" "}
-            <span className="font-medium text-[#7C3AED]">{initialDayOracle.vibration}</span>{" "}
+            <span className="font-medium text-[#262626]">{initialDayOracle.vibration}</span>{" "}
             — {initialDayOracle.title}
           </motion.p>
 
@@ -191,29 +208,29 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-            className="mx-auto mt-10 h-[1px] w-24 bg-gradient-to-r from-transparent via-[#C9A961]/30 to-transparent"
+            className="fv-divider mx-auto mt-10 w-24"
           />
 
           {/* 3-card grid — same structure as DailyVibrationCombined */}
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            <motion.div {...fadeUp(0.5)} className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Ambiance du jour</p>
-              <h3 className="mt-3 font-[family-name:var(--font-playfair)] text-xl font-medium text-[#1A1A1A]">
+            <motion.div {...fadeUp(0.5)} className="fv-card p-6 text-left">
+              <p className="fv-kicker text-xs text-[#262626]/70">Ambiance du jour</p>
+              <h3 className="fv-title mt-3 text-xl font-medium text-[#262626]">
                 {initialDayOracle.title}
               </h3>
-              <p className="mt-2 text-sm font-medium uppercase tracking-wider text-[#7C3AED]/60">
+              <p className="mt-2 text-sm font-medium uppercase tracking-wider text-[#262626]/60">
                 {initialDayOracle.keyword}
               </p>
             </motion.div>
 
-            <motion.div {...fadeUp(0.6)} className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Message du jour</p>
-              <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]">{initialDayOracle.dailyMessage}</p>
+            <motion.div {...fadeUp(0.6)} className="fv-card p-6 text-left">
+              <p className="fv-kicker text-xs text-[#262626]/70">Message du jour</p>
+              <p className="mt-3 text-sm leading-relaxed text-[#262626]">{initialDayOracle.dailyMessage}</p>
             </motion.div>
 
-            <motion.div {...fadeUp(0.7)} className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Rituel du jour</p>
-              <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]">{initialDayOracle.dailyRitual}</p>
+            <motion.div {...fadeUp(0.7)} className="fv-card p-6 text-left">
+              <p className="fv-kicker text-xs text-[#262626]/70">Rituel du jour</p>
+              <p className="mt-3 text-sm leading-relaxed text-[#262626]">{initialDayOracle.dailyRitual}</p>
             </motion.div>
           </div>
         </div>
@@ -222,32 +239,39 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
       {/* ═══════════════════════════════════════════════════════
           §2 — TON PRÉNOM
       ════════════════════════════════════════════════════════ */}
-      <section className="space-y-8 bg-[#FBFAF7] px-8 py-16">
+      <section className="space-y-8 px-8 py-16">
         <div className="mx-auto max-w-5xl space-y-8">
 
           <div className="space-y-2 text-center">
-            <motion.p {...fadeIn(0)} className="text-xs uppercase tracking-[0.35em] text-[#7C3AED]/70">
-              À toi
+            <motion.p {...fadeIn(0)} className="fv-kicker text-xs text-[#262626]/70">
+              On rentre à toi...
             </motion.p>
-            <motion.h2 {...fadeUp(0.1)} className="font-[family-name:var(--font-playfair)] text-3xl font-medium text-[#1A1A1A]">
+            <motion.h2 {...fadeUp(0.1)} className="fv-title text-3xl font-medium text-[#262626]">
               Quel est ton prénom ?
             </motion.h2>
-            <motion.p {...fadeIn(0.2)} className="text-sm text-[#1A1A1A]/50">
+            <motion.p {...fadeIn(0.2)} className="fv-muted text-sm">
               Pour calculer la vibration de ton nom et personnaliser l&apos;Oracle.
             </motion.p>
           </div>
 
           {/* Input card */}
-          <motion.div {...fadeUp(0.3)} className="mx-auto max-w-sm rounded-md border border-[#E5E3DD] bg-white/60 p-6 backdrop-blur-sm text-left">
-            <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Ton prénom</p>
+          <motion.div {...fadeUp(0.3)} className="fv-card mx-auto max-w-sm p-6 text-left">
+            <p className="fv-kicker text-xs text-[#262626]/70">Ton prénom</p>
             <input
               type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              value={firstNameInput}
+              onChange={(e) => setFirstNameInput(e.target.value)}
               placeholder="Marie, Luc, Amira…"
-              className="mt-3 w-full border-b border-[#E5E3DD] bg-transparent pb-3 text-xl text-[#1A1A1A] placeholder:text-[#1A1A1A]/25 focus:border-[#7C3AED] focus:outline-none transition-colors"
+              className="fv-input mt-3 w-full border-b bg-transparent pb-3 text-xl placeholder:text-[#1A1A1A]/25 focus:border-[#262626] focus:outline-none transition-colors"
               autoComplete="given-name"
             />
+            <button
+              type="button"
+              onClick={handleFirstNameValidate}
+              className="fv-btn-primary mt-5 inline-flex w-full items-center justify-center rounded-sm text-xs"
+            >
+              Valider le prénom
+            </button>
           </motion.div>
 
           {/* Vibration result — appears when name is typed */}
@@ -261,24 +285,24 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
                 transition={{ duration: 0.6, ease: "easeOut" }}
                 className="mx-auto grid max-w-sm grid-cols-1 gap-6 md:max-w-none md:grid-cols-3"
               >
-                <div className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Vibration · {nameVib}</p>
-                  <p className="mt-3 font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#7C3AED]">
+                <div className="fv-card p-6 text-left">
+                  <p className="fv-kicker text-xs text-[#262626]/70">Vibration · {nameVib}</p>
+                  <p className="fv-title mt-3 text-3xl font-semibold text-[#262626]">
                     {nameVib}
                   </p>
-                  <h3 className="mt-2 font-[family-name:var(--font-playfair)] text-xl font-medium text-[#1A1A1A]">
+                  <h3 className="fv-title mt-2 text-xl font-medium text-[#262626]">
                     {nameTitle}
                   </h3>
-                  <p className="mt-2 text-sm font-medium uppercase tracking-wider text-[#7C3AED]/60">
+                  <p className="mt-2 text-sm font-medium uppercase tracking-wider text-[#262626]/60">
                     {nameKeyword}
                   </p>
                 </div>
 
-                <div className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm md:col-span-2">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Ce que cela révèle</p>
-                  <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]">
+                <div className="fv-card p-6 text-left md:col-span-2">
+                  <p className="fv-kicker text-xs text-[#262626]/70">Ce que cela révèle</p>
+                  <p className="mt-3 text-sm leading-relaxed text-[#262626]">
                     Le prénom <span className="font-medium">{debouncedFirstName}</span> porte une vibration{" "}
-                    <span className="font-medium text-[#7C3AED]">{nameVib}</span>. Chaque lettre contribue à cette
+                    <span className="font-medium text-[#262626]">{nameVib}</span>. Chaque lettre contribue à cette
                     fréquence qui influence ton rapport au monde et ta façon de te manifester.
                   </p>
                 </div>
@@ -291,76 +315,81 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
       {/* ═══════════════════════════════════════════════════════
           §3 — TA DATE DE NAISSANCE (visible si prénom renseigné)
       ════════════════════════════════════════════════════════ */}
-      <AnimatePresence>
-        {firstName.length >= 2 && (
-          <motion.section
-            key="birth-date-section"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="space-y-10 bg-[#FBFAF7] px-8 py-16"
-          >
+      <motion.section
+        key="birth-date-section"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="space-y-10 px-8 py-16"
+      >
             <div className="mx-auto max-w-5xl space-y-10">
               <div className="space-y-2 text-center">
-                <p className="text-xs uppercase tracking-[0.35em] text-[#7C3AED]/70">Étape 2</p>
-                <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-medium text-[#1A1A1A]">
+                <p className="fv-kicker text-xs text-[#262626]/70">Étape 2</p>
+                <h2 className="fv-title text-3xl font-medium text-[#262626]">
                   Ta résonance personnelle aujourd&apos;hui
                 </h2>
-                <p className="mx-auto max-w-2xl text-sm leading-relaxed text-[#1A1A1A]/60">
+                <p className="fv-muted mx-auto max-w-2xl text-sm leading-relaxed">
                   En reliant ta date de naissance à la vibration du jour, l&apos;Oracle compose une lecture qui te parle
                   directement, à ton rythme.
                 </p>
               </div>
 
-              {/* 3-card grid — same as DailyVibrationCombined personal section */}
-              <div className="grid gap-6 md:grid-cols-3">
-                {/* Card 1 — input */}
-                <div className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Date de naissance</p>
+              <div className="mx-auto max-w-sm">
+                <div className="fv-card p-6 text-left">
+                  <p className="fv-kicker text-xs text-[#262626]/70">Date de naissance</p>
                   <input
                     type="date"
-                    value={birthDate}
-                    onChange={(e) => setBirthDate(e.target.value)}
-                    className="mt-3 w-full border-b border-[#E5E3DD] bg-transparent px-2 py-3 text-center text-base text-[#1A1A1A] outline-none focus:border-[#7C3AED]"
+                    value={birthDateInput}
+                    onChange={(e) => setBirthDateInput(e.target.value)}
+                    className="fv-input mt-3 w-full border-b bg-transparent px-2 py-3 text-center text-base text-[#262626] outline-none focus:border-[#262626]"
                     max={new Date().toISOString().split("T")[0]}
                   />
+                  <button
+                    type="button"
+                    onClick={handleBirthDateValidate}
+                    className="fv-btn-primary mt-5 inline-flex w-full items-center justify-center rounded-sm text-xs"
+                  >
+                    Valider la date
+                  </button>
                 </div>
+              </div>
 
+              {/* 2-card grid — résultat */}
+              <div className="grid gap-6 md:grid-cols-2">
                 {/* Card 2 — chemin de vie + résonance */}
-                <div className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Oracle personnel</p>
+                <div className="fv-card p-6 text-left">
+                  <p className="fv-kicker text-xs text-[#262626]/70">Oracle personnel</p>
                   {personalOracle && lifePath !== null ? (
                     <>
-                      <p className="mt-3 font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#7C3AED]">
+                      <p className="fv-title mt-3 text-3xl font-semibold text-[#262626]">
                         {personalOracle.vibration}
                       </p>
-                      <h3 className="mt-2 font-[family-name:var(--font-playfair)] text-xl font-medium text-[#1A1A1A]">
+                      <h3 className="fv-title mt-2 text-xl font-medium text-[#262626]">
                         {personalOracle.title}
                       </h3>
                       <p className="mt-1 text-xs uppercase tracking-[0.28em] text-[#1A1A1A]/50">
                         Chemin de vie · {lifePath}
                       </p>
-                      <p className="mt-2 text-sm font-medium uppercase tracking-wider text-[#7C3AED]/60">
+                      <p className="mt-2 text-sm font-medium uppercase tracking-wider text-[#262626]/60">
                         {personalOracle.keyword}
                       </p>
                     </>
                   ) : (
-                    <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]/60">
+                    <p className="fv-muted mt-3 text-sm leading-relaxed">
                       Entre ta date de naissance pour révéler ta résonance personnelle du jour.
                     </p>
                   )}
                 </div>
 
                 {/* Card 3 — message personnel */}
-                <div className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Ton message</p>
+                <div className="fv-card p-6 text-left">
+                  <p className="fv-kicker text-xs text-[#262626]/70">Ton message</p>
                   {personalOracle ? (
-                    <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]">
+                    <p className="mt-3 text-sm leading-relaxed text-[#262626]">
                       {personalOracle.personalMessage}
                     </p>
                   ) : (
-                    <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]/60">
+                    <p className="fv-muted mt-3 text-sm leading-relaxed">
                       Ton message personnel apparaîtra ici.
                     </p>
                   )}
@@ -378,9 +407,7 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
                 </motion.div>
               )}
             </div>
-          </motion.section>
-        )}
-      </AnimatePresence>
+      </motion.section>
 
       {/* ═══════════════════════════════════════════════════════
           §4 — TA VILLE DE NAISSANCE (visible si date renseignée)
@@ -396,25 +423,27 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
             className="space-y-8 px-8"
           >
             <div className="mx-auto max-w-5xl space-y-8">
-              <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-[#C9A961]/80">Étape 3 · Optionnel</p>
-                <h2 className="font-[family-name:var(--font-playfair)] text-2xl font-medium text-[#1A1A1A]">
+              <div className="space-y-2 text-center">
+                <p className="fv-kicker text-xs text-[#262626]/70">Étape 3 · Optionnel</p>
+                <h2 className="fv-title text-3xl font-medium text-[#262626]">
                   Ta ville de naissance
                 </h2>
-                <p className="text-sm text-[#1A1A1A]/50">Pour découvrir ton ascendant astrologique.</p>
+                <p className="fv-muted text-sm">Pour découvrir ton ascendant astrologique.</p>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Input card */}
-                <div className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Ville de naissance</p>
+              <div className="mx-auto max-w-sm">
+                <div className="fv-card p-6 text-left">
+                  <p className="fv-kicker text-xs text-[#262626]/70">Ville de naissance</p>
                   <div className="relative mt-3">
                     <input
                       type="text"
                       value={cityQuery}
-                      onChange={(e) => { setCityQuery(e.target.value); setAscendantSign(null); }}
+                      onChange={(e) => {
+                        setCityQuery(e.target.value);
+                        setAscendantSign(null);
+                      }}
                       placeholder="Paris, Lyon, Casablanca…"
-                      className="w-full border-b border-[#E5E3DD] bg-transparent pb-3 text-base text-[#1A1A1A] placeholder:text-[#1A1A1A]/25 focus:border-[#C9A961] focus:outline-none transition-colors"
+                      className="fv-input w-full border-b bg-transparent pb-3 text-center text-base placeholder:text-[#1A1A1A]/25 focus:border-[#262626] focus:outline-none transition-colors"
                     />
                     {cityLoading && (
                       <span className="absolute right-1 top-0 text-xs text-[#1A1A1A]/30">…</span>
@@ -426,7 +455,7 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
                             <button
                               type="button"
                               onClick={() => handleCitySelect(s)}
-                              className="w-full px-4 py-3 text-left text-sm text-[#1A1A1A] hover:bg-[#FBFAF7] transition-colors"
+                              className="w-full px-4 py-3 text-left text-sm text-[#1A1A1A] hover:bg-[#F1F1EE] transition-colors"
                             >
                               {s.displayName}
                             </button>
@@ -435,11 +464,20 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
                       </ul>
                     )}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setCityQuery((prev) => prev.trim())}
+                    className="fv-btn-primary mt-5 inline-flex w-full items-center justify-center rounded-sm text-xs"
+                  >
+                    Valider la ville
+                  </button>
                 </div>
+              </div>
 
+              <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
                 {/* Ascendant result card */}
-                <div className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Ascendant</p>
+                <div className="fv-card p-6 text-left">
+                  <p className="fv-kicker text-xs text-[#262626]/70">Ascendant</p>
                   {ascendantSign && ascendantSymbol ? (
                     <div className="mt-3 flex items-center gap-4">
                       <div
@@ -449,19 +487,19 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
                         {ascendantSymbol}
                       </div>
                       <div>
-                        <p className="font-[family-name:var(--font-playfair)] text-2xl font-medium text-[#1A1A1A]">
+                        <p className="fv-title text-2xl font-medium text-[#262626]">
                           {ascendantSign}
                         </p>
                         <Link
                           href="/mon-espace/astrologie"
-                          className="mt-1 inline-block text-xs font-semibold text-[#7C3AED] underline underline-offset-4 hover:text-[#6D28D9] transition-colors"
+                          className="mt-1 inline-block text-xs font-semibold text-[#262626] underline underline-offset-4 hover:text-[#111] transition-colors"
                         >
                           Voir mon thème complet →
                         </Link>
                       </div>
                     </div>
                   ) : (
-                    <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]/60">
+                    <p className="fv-muted mt-3 text-sm leading-relaxed">
                       Entre ta ville de naissance pour découvrir ton signe ascendant.
                     </p>
                   )}
@@ -487,8 +525,8 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
           >
             <div className="mx-auto max-w-5xl space-y-8">
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-[#1A1A1A]/40">Oracle</p>
-                <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-medium text-[#1A1A1A]">
+                <p className="fv-kicker text-xs text-[#1A1A1A]/40">Oracle</p>
+                <h2 className="fv-title text-3xl font-medium text-[#262626]">
                   {firstName ? `À toi, ${firstName}` : "Interroge l'Oracle"}
                 </h2>
               </div>
@@ -514,17 +552,17 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
             className="px-8"
           >
             <div className="mx-auto max-w-5xl">
-              <div className="rounded-md border border-[#E5E3DD] bg-white/60 p-8 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-[0.28em] text-[#7C3AED]">Ton espace</p>
-                <h2 className="mt-3 font-[family-name:var(--font-playfair)] text-2xl font-medium text-[#1A1A1A]">
+              <div className="fv-card p-8">
+                <p className="fv-kicker text-xs text-[#262626]">Ton espace</p>
+                <h2 className="fv-title mt-3 text-2xl font-medium text-[#262626]">
                   Crée ton espace, {firstName}
                 </h2>
-                <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#1A1A1A]/60">
+                <p className="fv-muted mt-3 max-w-xl text-sm leading-relaxed">
                   Conserve tes tirages, accède à ton thème astral complet et retrouve ta résonance personnelle chaque jour.
                 </p>
                 <Link
                   href="/login"
-                  className="mt-6 inline-flex items-center gap-2 rounded-sm bg-gradient-to-tl from-violet-600 to-indigo-600 px-8 py-3.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
+                  className="fv-btn-primary mt-6 inline-flex items-center gap-2 rounded-sm text-sm shadow-sm transition"
                 >
                   Créer mon espace gratuitement →
                 </Link>
@@ -537,85 +575,93 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
       {/* ═══════════════════════════════════════════════════════
           §7 — COMPATIBILITÉ TEASER
       ════════════════════════════════════════════════════════ */}
-      <section className="space-y-10 bg-[#FBFAF7] px-8 py-16">
+      <section className="space-y-10 px-8 py-16">
         <div className="mx-auto max-w-5xl space-y-10">
           <div className="space-y-2 text-center">
-            <motion.p {...fadeIn(0)} className="text-xs uppercase tracking-[0.35em] text-[#DB2777]/70">
+            <motion.p {...fadeIn(0)} className="fv-kicker text-xs text-[#262626]/70">
               Compatibilité
             </motion.p>
-            <motion.h2 {...fadeUp(0.1)} className="font-[family-name:var(--font-playfair)] text-3xl font-medium text-[#1A1A1A]">
+            <motion.h2 {...fadeUp(0.1)} className="fv-title text-3xl font-medium text-[#262626]">
               Vibrez-vous ensemble ?
             </motion.h2>
-            <motion.p {...fadeIn(0.2)} className="text-sm text-[#1A1A1A]/50">
+            <motion.p {...fadeIn(0.2)} className="fv-muted text-sm">
               Deux prénoms, une résonance vibratoire.
             </motion.p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {/* Input card */}
-            <motion.div {...fadeUp(0.3)} className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Deux prénoms</p>
+          <div className="mx-auto max-w-sm">
+            <motion.div {...fadeUp(0.3)} className="fv-card p-6 text-center">
+              <p className="fv-kicker text-xs text-[#262626]/70">Deux prénoms</p>
               <div className="mt-4 space-y-4">
                 <input
                   type="text"
-                  value={compatName1}
-                  onChange={(e) => setCompatName1(e.target.value)}
+                  value={compatName1Input}
+                  onChange={(e) => setCompatName1Input(e.target.value)}
                   placeholder="Prénom 1"
-                  className="w-full border-b border-[#E5E3DD] bg-transparent pb-2 text-base text-[#1A1A1A] placeholder:text-[#1A1A1A]/25 focus:border-[#DB2777] focus:outline-none transition-colors"
+                  className="fv-input w-full border-b bg-transparent pb-2 text-center text-base placeholder:text-[#1A1A1A]/25 focus:border-[#262626] focus:outline-none transition-colors"
                 />
                 <span className="block text-center text-lg text-[#1A1A1A]/20">♡</span>
                 <input
                   type="text"
-                  value={compatName2}
-                  onChange={(e) => setCompatName2(e.target.value)}
+                  value={compatName2Input}
+                  onChange={(e) => setCompatName2Input(e.target.value)}
                   placeholder="Prénom 2"
-                  className="w-full border-b border-[#E5E3DD] bg-transparent pb-2 text-base text-[#1A1A1A] placeholder:text-[#1A1A1A]/25 focus:border-[#DB2777] focus:outline-none transition-colors"
+                  className="fv-input w-full border-b bg-transparent pb-2 text-center text-base placeholder:text-[#1A1A1A]/25 focus:border-[#262626] focus:outline-none transition-colors"
                 />
               </div>
+              <button
+                type="button"
+                onClick={handleCompatibilityValidate}
+                className="fv-btn-primary mt-5 inline-flex w-full items-center justify-center rounded-sm text-xs"
+              >
+                Valider les prénoms
+              </button>
             </motion.div>
+          </div>
 
+          <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
             {/* Score card */}
-            <motion.div {...fadeUp(0.4)} className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Résonance</p>
+            <motion.div {...fadeUp(0.4)} className="fv-card p-6 text-center">
+              <p className="fv-kicker text-xs text-[#262626]/70">Résonance</p>
               {compatResult && compatResult.score > 0 ? (
                 <>
-                  <p className="mt-3 text-xs uppercase tracking-[0.28em] text-[#DB2777]/70">Nombre couple</p>
-                  <p className="mt-1 font-[family-name:var(--font-playfair)] text-4xl font-semibold text-[#DB2777]">
+                  <p className="mt-3 text-xs uppercase tracking-[0.28em] text-[#262626]/70">Nombre couple</p>
+                  <p className="fv-title mt-1 text-4xl font-semibold text-[#262626]">
                     {compatResult.coupleNumber}
                   </p>
-                  <h3 className="mt-2 font-[family-name:var(--font-playfair)] text-lg font-medium text-[#1A1A1A]">
+                  <h3 className="fv-title mt-2 text-lg font-medium text-[#262626]">
                     {compatResult.title}
                   </h3>
                   <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#E5E3DD]">
                     <div
-                      className="h-full rounded-full bg-[#DB2777] transition-all duration-700"
+                      className="h-full rounded-full bg-[#262626] transition-all duration-700"
                       style={{ width: `${compatResult.score * 10}%` }}
                     />
                   </div>
-                  <p className="mt-1 text-right text-xs font-medium text-[#DB2777]/70">{compatResult.score}/10</p>
+                  <p className="mt-1 text-right text-xs font-medium text-[#262626]/70">{compatResult.score}/10</p>
                 </>
               ) : (
-                <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]/60">
+                <p className="fv-muted mt-3 text-sm leading-relaxed">
                   Entre deux prénoms pour révéler votre score de compatibilité vibratoire.
                 </p>
               )}
             </motion.div>
 
             {/* Description card */}
-            <motion.div {...fadeUp(0.5)} className="rounded-md border border-[#E5E3DD] bg-white/60 p-6 text-left backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-[0.28em] text-[#C9A961]">Lecture</p>
+            <motion.div {...fadeUp(0.5)} className="fv-card p-6 text-center">
+              <p className="fv-kicker text-xs text-[#262626]/70">Lecture</p>
               {compatResult && compatResult.score > 0 ? (
                 <>
-                  <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]">{compatResult.description}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-[#262626]">{compatResult.description}</p>
                   <Link
                     href="/mon-espace/compatibilite"
-                    className="mt-4 inline-block text-xs font-semibold text-[#DB2777] underline underline-offset-4 hover:text-[#BE185D] transition-colors"
+                    className="mt-4 inline-block text-xs font-semibold text-[#262626] underline underline-offset-4 hover:text-[#111] transition-colors"
                   >
                     Compatibilité des signes astraux →
                   </Link>
                 </>
               ) : (
-                <p className="mt-3 text-sm leading-relaxed text-[#1A1A1A]/60">
+                <p className="fv-muted mt-3 text-sm leading-relaxed">
                   Ta lecture vibratoire apparaîtra ici.
                 </p>
               )}
@@ -630,10 +676,10 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
       <section className="space-y-12 px-8">
         <div className="mx-auto max-w-5xl space-y-12">
           <div className="text-center">
-            <motion.h2 {...fadeUp(0)} className="font-[family-name:var(--font-playfair)] text-4xl font-semibold text-[#1A1A1A] md:text-5xl">
+            <motion.h2 {...fadeUp(0)} className="fv-title text-4xl font-semibold text-[#262626] md:text-5xl">
               Quatre portes
             </motion.h2>
-            <motion.p {...fadeIn(0.15)} className="mt-4 text-sm text-[#1A1A1A]/50">
+            <motion.p {...fadeIn(0.15)} className="fv-muted mt-4 text-sm">
               Chaque porte ouvre un angle différent de ta réalité
             </motion.p>
           </div>
@@ -642,25 +688,25 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
               href="/comprendre"
               title="Comprendre"
               subtitle="Numérologie, cycles, archétypes et lignes de force de ton chemin."
-              accentColor="var(--comprendre)"
+              accentColor="#262626"
             />
             <PortalCard
               href="/aimer"
               title="Aimer"
               subtitle="Compatibilités, résonances de prénoms et signatures affectives."
-              accentColor="var(--aimer)"
+              accentColor="#262626"
             />
             <PortalCard
               href="/prevoir"
               title="Prévoir"
               subtitle="Horoscopes, périodes charnières et fenêtres d&apos;opportunité."
-              accentColor="var(--prevoir)"
+              accentColor="#262626"
             />
             <PortalCard
               href="/recevoir"
               title="Recevoir"
               subtitle="Tirages intuitifs, messages symboliques et guidance en temps réel."
-              accentColor="var(--recevoir)"
+              accentColor="#262626"
             />
           </div>
         </div>

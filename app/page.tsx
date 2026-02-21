@@ -13,9 +13,11 @@ export default function Home() {
   const dayOracle = oracleOfDay(new Date());
 
   return (
-    <>
+    <div className="fv-page">
       <ViewEvent name="view_oracle_home" />
-      <HomeProgressive initialDayOracle={dayOracle} />
-    </>
+      <div className="fv-container">
+        <HomeProgressive initialDayOracle={dayOracle} />
+      </div>
+    </div>
   );
 }

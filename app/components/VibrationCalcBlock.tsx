@@ -11,8 +11,8 @@ type Props = DailyProps | PersonalProps;
 export default function VibrationCalcBlock(props: Props) {
   if (props.type === "daily") {
     return (
-      <div className="mx-auto mt-6 max-w-md rounded-md border border-[#E5E3DD] bg-[#FBFAF7] px-5 py-4 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#C9A961]">
+      <div className="fv-card mx-auto mt-6 max-w-md px-5 py-4 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#262626]/70">
           Calcul
         </p>
         <div className="mt-3 space-y-1">
@@ -30,14 +30,14 @@ export default function VibrationCalcBlock(props: Props) {
   if (!lifePathSteps?.length && !resonanceSteps?.length) return null;
 
   return (
-    <div className="mx-auto mt-6 max-w-md rounded-md border border-[#E5E3DD] bg-[#FBFAF7] px-5 py-4 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#C9A961]">
+    <div className="fv-card mx-auto mt-6 max-w-md px-5 py-4 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#262626]/70">
         Calcul
       </p>
       <div className="mt-3 space-y-1">
         {lifePathSteps && lifePathSteps.length > 0 && (
           <>
-            <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[#C9A961]/70">
+            <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[#262626]/60">
               Chemin de vie
             </p>
             {lifePathSteps.map((step, i) => (
@@ -52,7 +52,7 @@ export default function VibrationCalcBlock(props: Props) {
             {lifePathSteps && lifePathSteps.length > 0 && (
               <div className="my-2 h-[1px] bg-[#E5E3DD]" />
             )}
-            <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[#C9A961]/70">
+            <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[#262626]/60">
               Résonance personnelle
             </p>
             {resonanceSteps.map((step, i) => (

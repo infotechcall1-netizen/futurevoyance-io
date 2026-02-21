@@ -134,12 +134,12 @@ export default function OracleChat({
   }
 
   return (
-    <section className="space-y-10 bg-[#FBFAF7] px-8 py-16 md:px-16 md:py-20">
+    <section className="fv-page space-y-10 px-8 py-16 md:px-16 md:py-20">
       <div className="text-center">
-        <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-medium text-[#1A1A1A] md:text-4xl">
+        <h2 className="fv-title text-3xl font-medium text-[#262626] md:text-4xl">
           Pose ta question
         </h2>
-        <p className="mt-3 text-sm text-[#1A1A1A]/50">
+        <p className="fv-muted mt-3 text-sm">
           L'Oracle écoute
         </p>
       </div>
@@ -154,8 +154,8 @@ export default function OracleChat({
                 onClick={() => setPortalId(p.id)}
                 className={`rounded-sm px-5 py-2.5 text-sm font-medium transition-all ${
                   portalId === p.id
-                    ? "bg-[#7C3AED] text-white"
-                    : "border border-[#E5E3DD] bg-transparent text-[#1A1A1A]/70 hover:border-[#1A1A1A]/30 hover:text-[#1A1A1A]"
+                    ? "fv-btn-primary"
+                    : "fv-btn-secondary text-[#262626]/70 hover:border-[#262626]/30 hover:text-[#262626]"
                 }`}
               >
                 {p.label}
@@ -170,7 +170,7 @@ export default function OracleChat({
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder={firstName ? `Pose ta question, ${firstName}…` : "Écris ton intention…"}
-            className="w-full border-b border-[#E5E3DD] bg-transparent px-2 py-6 text-center text-lg text-[#1A1A1A] placeholder:text-[#1A1A1A]/30 focus:border-[#7C3AED] focus:outline-none"
+            className="fv-input w-full border-b bg-transparent px-2 py-6 text-center text-lg text-[#262626] placeholder:text-[#1A1A1A]/30 focus:border-[#262626] focus:outline-none"
             disabled={loading}
           />
         </div>
@@ -179,7 +179,7 @@ export default function OracleChat({
           <button
             type="submit"
             disabled={!canSubmit}
-            className="inline-flex items-center gap-2 rounded-sm bg-[#7C3AED] px-10 py-4 text-base font-medium text-white shadow-sm transition-all hover:bg-[#6D28D9] disabled:cursor-not-allowed disabled:opacity-40"
+            className="fv-btn-primary inline-flex items-center gap-2 rounded-sm text-base shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-40"
           >
             {loading ? "Consultation en cours..." : "Consulter"}
           </button>
@@ -201,29 +201,29 @@ export default function OracleChat({
           )}
           
           {content.archetype && content.ombre && content.initiation && content.transmutation && content.rituel && (
-            <div className="rounded-sm border border-indigo-200/40 bg-gradient-to-br from-slate-50 to-indigo-50/30 p-6 shadow-sm">
-              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.35em] text-indigo-900/70">
+            <div className="fv-card p-6 shadow-sm">
+              <p className="fv-kicker mb-5 text-xs font-semibold text-[#262626]/70">
                 Lecture initiatique
               </p>
               <div className="space-y-4 text-sm leading-relaxed">
                 <div>
-                  <span className="font-medium text-indigo-900">Archétype :</span>
+                  <span className="font-medium text-[#262626]">Archétype :</span>
                   <span className="ml-2 text-slate-700">{content.archetype}</span>
                 </div>
                 <div>
-                  <span className="font-medium text-indigo-900">Ombre :</span>
+                  <span className="font-medium text-[#262626]">Ombre :</span>
                   <span className="ml-2 text-slate-700">{content.ombre}</span>
                 </div>
                 <div>
-                  <span className="font-medium text-indigo-900">Initiation :</span>
+                  <span className="font-medium text-[#262626]">Initiation :</span>
                   <span className="ml-2 text-slate-700">{content.initiation}</span>
                 </div>
                 <div>
-                  <span className="font-medium text-indigo-900">Transmutation :</span>
+                  <span className="font-medium text-[#262626]">Transmutation :</span>
                   <span className="ml-2 text-slate-700">{content.transmutation}</span>
                 </div>
                 <div>
-                  <span className="font-medium text-amber-800">Rituel :</span>
+                  <span className="font-medium text-[#262626]">Rituel :</span>
                   <span className="ml-2 text-slate-700">{content.rituel}</span>
                 </div>
               </div>
@@ -232,7 +232,7 @@ export default function OracleChat({
           
           <div className="space-y-8">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C9A961]">
+              <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#262626]/70">
                 Essentiel
               </p>
               <p className="mt-4 text-base leading-relaxed text-[#1A1A1A]">
@@ -241,13 +241,13 @@ export default function OracleChat({
             </div>
             
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C9A961]">
+              <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#262626]/70">
                 Lecture
               </p>
               <ul className="mt-4 space-y-3 text-sm leading-relaxed text-[#1A1A1A]/80">
                 {content.lecture.map((item, i) => (
                   <li key={i} className="flex gap-3">
-                    <span className="text-[#7C3AED]">•</span>
+                    <span className="text-[#262626]">•</span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -255,7 +255,7 @@ export default function OracleChat({
             </div>
             
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#C9A961]">
+              <p className="text-xs font-medium uppercase tracking-[0.3em] text-[#262626]/70">
                 Action
               </p>
               <p className="mt-4 text-base leading-relaxed text-[#1A1A1A]">
@@ -285,7 +285,7 @@ export default function OracleChat({
                   }
                 }
               }}
-              className="rounded-sm border border-[#C9A961]/40 bg-transparent px-6 py-3 text-sm font-medium text-[#C9A961] transition-all hover:border-[#C9A961]/60"
+              className="fv-btn-secondary rounded-sm border-[#262626]/30 px-6 py-3 text-sm font-medium text-[#262626] transition-all hover:border-[#262626]/50"
             >
               Télécharger ma carte
             </button>

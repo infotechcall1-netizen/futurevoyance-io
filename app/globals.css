@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F6F4EF;
-  --foreground: #1A1A1A;
+  --fv-bg: #F9F9F7;
+  --fv-text: #262626;
+  --fv-border: rgba(0, 0, 0, 0.1);
+  --fv-border-soft: rgba(0, 0, 0, 0.08);
+  --fv-surface-glass: rgba(255, 255, 255, 0.5);
+  --fv-muted: #6B7280;
+  --font-playfair: var(--font-cinzel);
+  --background: var(--fv-bg);
+  --foreground: var(--fv-text);
   --surface-white: #FBFAF7;
   --accent-violet: #7C3AED;
   --accent-gold: #C9A961;
@@ -16,41 +23,202 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: #7C3AED;
+  --color-background-light: #F8F9FA;
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-space);
+  --font-display: var(--font-cinzel);
+  --radius-pill: 9999px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--fv-bg);
+  color: var(--fv-text);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.nav-shadow {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
 body::before {
-  content: '';
+  content: "";
   position: fixed;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.02), transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(201, 169, 97, 0.02), transparent 40%);
-  animation: subtlePulse 30s ease-in-out infinite;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 14% 22%, rgba(0, 0, 0, 0.22) 0.6px, transparent 1.2px),
+    radial-gradient(circle at 72% 18%, rgba(0, 0, 0, 0.2) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 86% 76%, rgba(0, 0, 0, 0.22) 0.6px, transparent 1.2px),
+    radial-gradient(circle at 24% 80%, rgba(0, 0, 0, 0.2) 0.7px, transparent 1.3px),
+    radial-gradient(circle at 50% 50%, transparent 280px, rgba(0, 0, 0, 0.08) 281px, rgba(0, 0, 0, 0.08) 282px, transparent 283px),
+    radial-gradient(circle at 50% 50%, transparent 420px, rgba(0, 0, 0, 0.08) 421px, rgba(0, 0, 0, 0.08) 422px, transparent 423px);
+  background-size: 400px 400px, 400px 400px, 400px 400px, 400px 400px, 900px 900px, 1200px 1200px;
+  background-repeat: repeat, repeat, repeat, repeat, no-repeat, no-repeat;
+  background-position: 0 0, 180px 120px, 260px 240px, 120px 320px, calc(50% - 140px) -120px, calc(50% + 220px) 180px;
+  opacity: 0.15;
   pointer-events: none;
   z-index: 0;
 }
 
-@keyframes subtlePulse {
-  0%, 100% { transform: translate(0, 0); opacity: 1; }
-  50% { transform: translate(-1%, -1%); opacity: 0.8; }
+body::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: -120px;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.01) 50%, transparent 100%);
+  animation: fvScanline 12s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes fvScanline {
+  0% {
+    transform: translateY(-10vh);
+  }
+  100% {
+    transform: translateY(120vh);
+  }
 }
 
 main {
   position: relative;
   z-index: 1;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Mystical Oracle reusable classes */
+.fv-page {
+  background: var(--fv-bg);
+  color: var(--fv-text);
+}
+
+.fv-container {
+  position: relative;
+  z-index: 1;
+}
+
+.fv-card {
+  background: var(--fv-surface-glass);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--fv-border);
+  border-radius: 0;
+}
+
+.fv-btn-primary {
+  background: #262626;
+  color: #fff;
+  border: 1px solid #262626;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-family: var(--font-space), sans-serif;
+  font-weight: 500;
+  padding: 0.9rem 1.8rem;
+}
+
+.fv-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.fv-btn-secondary {
+  background: transparent;
+  color: var(--fv-text);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-family: var(--font-space), sans-serif;
+  padding: 0.85rem 1.6rem;
+}
+
+.fv-btn-secondary:hover {
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+.fv-title {
+  font-family: var(--font-cinzel), serif;
+  color: var(--fv-text);
+}
+
+.fv-kicker {
+  font-family: var(--font-space), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.fv-muted {
+  color: var(--fv-muted);
+}
+
+.fv-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--fv-border-soft), transparent);
+}
+
+.fv-input {
+  font-family: var(--font-inter), sans-serif;
+  color: var(--fv-text);
+  border-color: var(--fv-border-soft);
+}
+
+.fv-input::placeholder {
+  color: rgba(38, 38, 38, 0.35);
+}
+
+.fv-symbol-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fv-symbol {
+  position: absolute;
+  color: rgba(0, 0, 0, 0.18);
+  font-family: var(--font-cinzel), serif;
+  font-size: clamp(1.15rem, 2vw, 1.8rem);
+  user-select: none;
+}
+
+.fv-symbol-1 { top: 12%; left: 9%; }
+.fv-symbol-2 { top: 22%; right: 14%; }
+.fv-symbol-3 { top: 47%; left: 6%; }
+.fv-symbol-4 { top: 62%; right: 10%; }
+.fv-symbol-5 { bottom: 17%; left: 14%; }
+.fv-symbol-6 { bottom: 11%; right: 24%; }
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-cinzel), serif;
+  color: var(--fv-text);
+}
+
+nav,
+button,
+.fv-btn-primary,
+.fv-btn-secondary {
+  font-family: var(--font-space), sans-serif;
+}
+
+input,
+textarea,
+select,
+p,
+li,
+label {
+  font-family: var(--font-inter), sans-serif;
 }
 
 a,
@@ -59,15 +227,18 @@ button {
 }
 
 a:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--accent-violet);
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #262626;
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 ::selection {
-  background: rgba(124, 58, 237, 0.2);
-  color: #1A1A1A;
+  background: rgba(0, 0, 0, 0.14);
+  color: var(--fv-text);
 }
 
 @keyframes slide-in-from-right {
@@ -103,5 +274,18 @@ button:focus-visible {
   }
   to {
     opacity: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  body::before {
+    background-size: 320px 320px, 320px 320px, 320px 320px, 320px 320px, 640px 640px, 820px 820px;
+    background-position: 0 0, 140px 80px, 200px 180px, 90px 220px, center -120px, center 140px;
+    opacity: 0.12;
+  }
+
+  .fv-symbol {
+    opacity: 0.65;
+    font-size: 1rem;
   }
 }
