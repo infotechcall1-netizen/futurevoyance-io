@@ -53,20 +53,21 @@ export default function MonthCalendar() {
       days.push(
         <div
           key={`day-${day}`}
-          className={`relative flex items-center justify-center text-base font-medium py-2 transition-all ${
+          className={`relative flex items-center justify-center text-base font-medium py-2 transition-all overflow-visible ${
             isToday
               ? "font-bold text-[#262626]"
               : "text-[#262626]/60"
           }`}
         >
-          {day}
+          <span className={isToday ? "relative z-10" : undefined}>{day}</span>
           {isToday && (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 pointer-events-none z-10">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <svg
-                className="heart-svg-anim"
+                className="calendar-heart-svg w-12 h-12 flex-shrink-0"
                 viewBox="0 0 100 100"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                aria-hidden
               >
                 <path
                   d="M50 85C50 85 10 65 10 35C10 18 25 10 40 20C45 23 50 30 50 30C50 30 55 23 60 20C75 10 90 18 90 35C90 65 50 85 50 85"
@@ -75,10 +76,8 @@ export default function MonthCalendar() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   transform="rotate(-15, 50, 50) scale(1.1)"
-                  style={{
-                    strokeDasharray: 200,
-                    strokeDashoffset: 200,
-                  }}
+                  strokeDasharray="350"
+                  strokeDashoffset="350"
                 />
               </svg>
             </div>
@@ -91,24 +90,13 @@ export default function MonthCalendar() {
   }
 
   return (
-    <div className="fv-card w-full max-w-sm mx-auto p-8">
-      <style jsx>{`
-        @keyframes heart-draw {
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-        .heart-svg-anim path {
-          animation: heart-draw 1.5s ease-out forwards;
-        }
-      `}</style>
-
+    <div className="fv-card w-full max-w-sm mx-auto p-8 overflow-visible">
       <header className="text-center mb-8">
         <h1 className="font-display text-5xl sm:text-6xl text-[#262626] leading-tight">{monthName}</h1>
         <p className="text-sm tracking-widest font-semibold text-[#262626]/50 mt-[-8px]">{year}</p>
       </header>
 
-      <div className="grid grid-cols-7 gap-y-4 text-center">
+      <div className="grid grid-cols-7 gap-y-4 text-center overflow-visible">
         <div className="text-xs font-black uppercase tracking-widest text-[#262626]">L</div>
         <div className="text-xs font-black uppercase tracking-widest text-[#262626]">M</div>
         <div className="text-xs font-black uppercase tracking-widest text-[#262626]">M</div>
