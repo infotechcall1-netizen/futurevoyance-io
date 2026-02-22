@@ -11,6 +11,7 @@ import VibrationCalcBlock from "./VibrationCalcBlock";
 import DottedSurface from "./ui/DottedSurface";
 import DailyCardStack from "./DailyCardStack";
 import CardStack3D, { type Card3DData } from "./CardStack3D";
+import MonthCalendar from "./MonthCalendar";
 import type { OracleVibration } from "../lib/oracle";
 import { oraclePersonal, lifePathFromDate } from "../lib/oracle";
 import { firstNameVibration, vibrationKeyword, vibrationTitle, firstNameCompatibility } from "@/lib/numerology";
@@ -152,14 +153,6 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
       ? firstNameCompatibility(debouncedCompatName1, debouncedCompatName2)
       : null;
 
-  // Today label
-  const todayLabel = new Date().toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-
   // ── Render ──────────────────────────────────────────────────────────────
   return (
     <div className="fv-page space-y-24">
@@ -177,22 +170,17 @@ export default function HomeProgressive({ initialDayOracle }: HomeProgressivePro
         <DottedSurface className="absolute inset-0 -z-10 opacity-30 blur-[0.2px]" ariaHidden />
         <div className="relative z-10 mx-auto max-w-5xl">
 
-          {/* Date label */}
-          <motion.p {...fadeIn(0)} className="fv-kicker text-xs text-[#262626]/70">
-            Aujourd&apos;hui
-          </motion.p>
-
-          {/* Big Playfair date — same as DailyVibrationCombined */}
-          <motion.h1
-            {...fadeUp(0.1)}
-            className="fv-title mt-4 text-[#262626]"
-            style={{ fontSize: "clamp(2.5rem, 5vw + 1rem, 4.5rem)" }}
+          {/* Month Calendar Widget */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
           >
-            {todayLabel}
-          </motion.h1>
+            <MonthCalendar />
+          </motion.div>
 
           {/* Vibration sub-line */}
-          <motion.p {...fadeIn(0.2)} className="fv-muted mt-6 text-base font-light">
+          <motion.p {...fadeIn(0.2)} className="fv-muted mt-8 text-center text-base font-light">
             Vibration du jour :{" "}
             <span className="font-medium text-[#262626]">{initialDayOracle.vibration}</span>{" "}
             — {initialDayOracle.title}
