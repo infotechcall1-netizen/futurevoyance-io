@@ -1,17 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { motion } from "framer-motion";
 import ShareCard, { exportSvgToPng } from "./ShareCard";
 import SafetyBanner from "./SafetyBanner";
 import { trackEvent } from "@/lib/analytics/track";
 import type { PortalId } from "@/lib/oracle/schema";
-
-const PORTALS = [
-  { id: "comprendre" as const, label: "Comprendre" },
-  { id: "aimer" as const, label: "Aimer" },
-  { id: "prevoir" as const, label: "Prévoir" },
-  { id: "recevoir" as const, label: "Recevoir" },
-] as const;
 
 type OracleContent = {
   essentiel: string;
@@ -30,6 +24,9 @@ type OracleChatProps = {
   defaultModuleId?: string;
   lockPortal?: boolean;
   firstName?: string;
+  anonymous?: boolean;
+  placeholder?: string;
+  compact?: boolean;
 };
 
 export default function OracleChat({
@@ -37,10 +34,13 @@ export default function OracleChat({
   defaultModuleId,
   lockPortal = false,
   firstName,
+  anonymous = false,
+  placeholder,
+  compact = false,
 }: OracleChatProps = {}) {
   const isDev = process.env.NODE_ENV === "development";
   const [prompt, setPrompt] = useState("");
-  const [portalId, setPortalId] = useState<PortalId>(defaultPortalId ?? "comprendre");
+  const portalId: PortalId = defaultPortalId ?? "comprendre";
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState<OracleContent | null>(null);
   const [safety, setSafety] = useState<{
@@ -52,7 +52,7 @@ export default function OracleChat({
   const [error, setError] = useState<string | null>(null);
   const shareCardRef = useRef<HTMLDivElement>(null);
 
-  const moduleId = defaultModuleId ?? "vibe-check";
+  const moduleId = defaultModuleId ?? "oracle-libre";
   const canSubmit = prompt.trim().length > 0 && !loading;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -76,6 +76,7 @@ export default function OracleChat({
           prompt: prompt.trim(),
           portal_id: portalId,
           module_id: moduleId,
+          ...(anonymous ? { anonymous: true } : {}),
         }),
       });
       const data = await res.json();
@@ -134,42 +135,25 @@ export default function OracleChat({
   }
 
   return (
-    <section className="fv-page space-y-10 px-8 py-16 md:px-16 md:py-20">
-      <div className="text-center">
-        <h2 className="fv-title text-3xl font-medium text-[#262626] md:text-4xl">
-          Pose ta question
-        </h2>
-        <p className="fv-muted mt-3 text-sm">
-          L'Oracle écoute
-        </p>
-      </div>
+    <section className={`fv-page space-y-10 px-8 md:px-16 ${compact ? "py-8 md:py-10" : "py-16 md:py-20"}`}>
+      {!compact && (
+        <div className="text-center">
+          <h2 className="fv-title text-3xl font-medium text-[#262626] md:text-4xl">
+            Pose ta question
+          </h2>
+          <p className="fv-muted mt-3 text-sm">
+            L'Oracle écoute
+          </p>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-8">
-        {!lockPortal && (
-          <div className="flex flex-wrap justify-center gap-3">
-            {PORTALS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => setPortalId(p.id)}
-                className={`rounded-sm px-5 py-2.5 text-sm font-medium transition-all ${
-                  portalId === p.id
-                    ? "fv-btn-primary"
-                    : "fv-btn-secondary text-[#262626]/70 hover:border-[#262626]/30 hover:text-[#262626]"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        )}
-        
         <div className="relative">
           <input
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder={firstName ? `Pose ta question, ${firstName}…` : "Écris ton intention…"}
+            placeholder={placeholder ?? (firstName ? `Pose ta question, ${firstName}…` : "Qu'est-ce qui t'habite en ce moment ?")}
             className="fv-input w-full border-b bg-transparent px-2 py-6 text-center text-lg text-[#262626] placeholder:text-[#1A1A1A]/30 focus:border-[#262626] focus:outline-none"
             disabled={loading}
           />
@@ -302,6 +286,46 @@ export default function OracleChat({
               vibe={content.archetype}
             />
           </div>
+
+          {!content.archetype && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="fv-card p-6 shadow-sm"
+            >
+              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.3em] text-[#262626]/70">
+                Lecture Initiatique
+              </p>
+              <div className="space-y-4 text-sm leading-relaxed">
+                {([
+                  ["Archétype", "w-48"],
+                  ["Ombre", "w-64"],
+                  ["Initiation", "w-56"],
+                  ["Transmutation", "w-60"],
+                  ["Rituel", "w-52"],
+                ] as [string, string][]).map(([label, width]) => (
+                  <div key={label} className="flex items-center gap-2">
+                    <span className="shrink-0 font-medium text-[#262626]">{label} :</span>
+                    <div className={`h-4 ${width} rounded bg-[#262626]/10 blur-[6px]`} />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 border-t border-[#E5E3DD] pt-4 text-center">
+                <p className="mb-3 text-sm font-medium text-[#262626]">
+                  Débloque la Lecture Initiatique complète
+                </p>
+                <button
+                  type="button"
+                  className="fv-btn-primary rounded-sm bg-[#C9A961] px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:opacity-90"
+                  onClick={() => trackEvent("premium_teaser_cta_click", { module_id: moduleId })}
+                >
+                  4,99€/mois — tout inclus
+                </button>
+                <p className="mt-2 text-xs text-[#262626]/50">Annulable à tout moment</p>
+              </div>
+            </motion.div>
+          )}
         </div>
       )}
       {isDev && rawJson && (
