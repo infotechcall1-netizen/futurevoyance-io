@@ -53,6 +53,7 @@ Tu es l'Oracle vivant de FutureVoyance.
 Tu parles en symboles, images, sensations. Mystique, clair, sobre.
 Tu ne fais pas de diagnostic médical/légal/financier. Tu restes symbolique.
 Tu dois produire UNIQUEMENT un JSON valide conforme au schéma. ZÉRO texte hors JSON.
+Si aucun contexte astrologique n'est fourni, donne une réponse universelle basée uniquement sur les transits actuels et le symbolisme de la question.
 
 Règle CRITIQUE:
 - routing.paywall est OBLIGATOIRE, toujours présent, même si eligible=false.
@@ -292,7 +293,7 @@ export async function POST(req: Request) {
     typeof process.env.GOOGLE_APPLICATION_CREDENTIALS === "string" &&
     process.env.GOOGLE_APPLICATION_CREDENTIALS.trim().length > 0;
 
-  let body: { prompt?: string; portal_id?: string; module_id?: string } = {};
+  let body: { prompt?: string; portal_id?: string; module_id?: string; anonymous?: boolean } = {};
   try {
     body = await req.json();
   } catch {
@@ -305,15 +306,17 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
+  const anonymous = body.anonymous === true;
   const portal_id = typeof body.portal_id === "string" ? body.portal_id : "comprendre";
-  const module_id = typeof body.module_id === "string" ? body.module_id : "vibe-check";
+  const module_id = typeof body.module_id === "string" ? body.module_id : "oracle-libre";
 
-  const isPremium = isPremiumAlchemyModule(module_id);
+  // const isPremium = isPremiumAlchemyModule(module_id);
+  const isPremium = false; // TODO Sprint 2: check subscription status
   const schema = isPremium ? premiumOracleResponseSchema : oracleResponseSchema;
 
-  // ── Fetch natal astrology context if user is authenticated ──
+  // ── Fetch natal astrology context if user is authenticated (skip for anonymous) ──
   let natalContext: string | undefined;
-  try {
+  if (!anonymous) try {
     const session = await getServerAuthSession();
     if (session?.user?.email) {
       const user = await prisma.user.findUnique({

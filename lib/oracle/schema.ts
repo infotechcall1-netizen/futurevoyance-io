@@ -11,6 +11,7 @@ export const moduleIdSchema = z.enum([
   "decision-ab",
   "daily-mantra",
   "abundance-key",
+  "oracle-libre",
 ]);
 
 export const offerIdSchema = z.enum([
@@ -33,8 +34,8 @@ export const safetyCategorySchema = z.enum([
 export const oracleResponseSchema = z.object({
   version: z.literal("1.2"),
   routing: z.object({
-    portal_id: portalIdSchema,
-    module_id: moduleIdSchema,
+    portal_id: portalIdSchema.optional().default("comprendre"),
+    module_id: moduleIdSchema.optional().default("vibe-check"),
     paywall: z.object({
       eligible: z.boolean(),
       offer_id: offerIdSchema.nullable(),
@@ -74,8 +75,8 @@ export const premiumAlchemyContentSchema = z.object({
 export const premiumOracleResponseSchema = z.object({
   version: z.literal("1.2"),
   routing: z.object({
-    portal_id: portalIdSchema,
-    module_id: moduleIdSchema,
+    portal_id: portalIdSchema.optional().default("comprendre"),
+    module_id: moduleIdSchema.optional().default("vibe-check"),
     paywall: z.object({
       eligible: z.boolean(),
       offer_id: offerIdSchema.nullable(),
