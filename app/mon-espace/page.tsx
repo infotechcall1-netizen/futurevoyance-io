@@ -15,6 +15,7 @@ import VibrationDayCard from "@/app/components/VibrationDayCard";
 import DailyGuidance from "@/app/components/DailyGuidance";
 import SubscriptionGate from "@/app/components/SubscriptionGate";
 import MonthCalendar from "@/app/components/MonthCalendar";
+import RetentionBar from "@/app/components/RetentionBar";
 
 export const metadata: Metadata = {
   title: "Mon Espace | FutureVoyance",
@@ -268,6 +269,7 @@ export default async function MonEspacePage() {
       </section>
 
       {/* 7 — Rituels & Pratiques (Bientôt) */}
+      <RetentionBar />
       <section className="space-y-4 border-l-2 border-[#C9A961] bg-[#FBFAF7] px-6 py-8 opacity-70">
         <div className="flex items-center gap-2">
           <div className="size-2 rounded-full bg-[#C9A961] animate-pulse" />

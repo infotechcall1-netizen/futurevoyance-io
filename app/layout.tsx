@@ -36,9 +36,25 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "FutureVoyance • Oracle IA vivant",
+  title: "FutureVoyance — Oracle IA vivant",
   description:
-    "Oracle IA ésotérique qui se souvient de tes dates, cycles et rituels pour t'offrir un message juste, au bon moment.",
+    "Pose ta question. Découvre ta numérologie, ton thème astral, ta compatibilité. Oracle IA gratuit, personnalisé par tes données cosmiques.",
+  metadataBase: new URL("https://www.futurevoyance.io"),
+  openGraph: {
+    title: "FutureVoyance — Oracle IA vivant",
+    description:
+      "Pose ta question. Découvre ta numérologie, ton thème astral, ta compatibilité. Oracle IA gratuit, personnalisé par tes données cosmiques.",
+    url: "https://www.futurevoyance.io",
+    siteName: "FutureVoyance",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FutureVoyance — Oracle IA vivant",
+    description:
+      "Pose ta question. Découvre ta numérologie, ton thème astral, ta compatibilité.",
+  },
 };
 
 export default function RootLayout({
