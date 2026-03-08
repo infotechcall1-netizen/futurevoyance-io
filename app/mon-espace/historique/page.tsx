@@ -6,6 +6,7 @@ import { getServerAuthSession } from "@/lib/auth";
 import { redis } from "@/lib/redis";
 import { UID_COOKIE } from "@/lib/constants";
 import type { OracleResponse, PortalId } from "@/lib/oracle/schema";
+import SubscriptionGate from "@/app/components/SubscriptionGate";
 
 export const metadata: Metadata = {
   title: "Historique · Mon Espace | FutureVoyance",
@@ -64,6 +65,8 @@ export default async function HistoriquePage() {
   }
 
   const history = await getHistory(userKey);
+  const visibleHistory = history.slice(0, 5);
+  const archivedHistory = history.slice(5);
 
   return (
     <div className="space-y-16">
@@ -90,6 +93,9 @@ export default async function HistoriquePage() {
           </h2>
           <span className="text-xs font-medium uppercase tracking-[0.25em] text-[#1A1A1A]/40">
             {history.length} tirages
+            {archivedHistory.length > 0 && (
+              <> · 5 visibles · {archivedHistory.length} archivés</>
+            )}
           </span>
         </div>
 
@@ -107,52 +113,106 @@ export default async function HistoriquePage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-1 lg:grid-cols-2">
-            {history.map((item) => (
-              <div
-                key={item.id}
-                className={`group flex flex-col justify-between p-6 transition-all hover:shadow-sm ${
-                  PORTAL_COLORS[item.portal_id] || "border-l-2 border-[#7C3AED] bg-[#FBFAF7]"
-                }`}
-              >
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <span className="rounded-sm bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#1A1A1A]/70 shadow-sm">
-                      {PORTAL_LABELS[item.portal_id] || item.portal_id}
-                    </span>
-                    <span className="text-[10px] font-medium text-[#1A1A1A]/40">
-                      {new Date(item.timestamp).toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+          <div className="space-y-8">
+            <div className="grid gap-5 sm:grid-cols-1 lg:grid-cols-2">
+              {visibleHistory.map((item) => (
+                <div
+                  key={item.id}
+                  className={`group flex flex-col justify-between p-6 transition-all hover:shadow-sm ${
+                    PORTAL_COLORS[item.portal_id] || "border-l-2 border-[#7C3AED] bg-[#FBFAF7]"
+                  }`}
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <span className="rounded-sm bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#1A1A1A]/70 shadow-sm">
+                        {PORTAL_LABELS[item.portal_id] || item.portal_id}
+                      </span>
+                      <span className="text-[10px] font-medium text-[#1A1A1A]/40">
+                        {new Date(item.timestamp).toLocaleDateString("fr-FR", {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="line-clamp-1 text-xs italic text-[#1A1A1A]/50 group-hover:text-[#1A1A1A]/60">
+                        &ldquo;{item.prompt}&rdquo;
+                      </p>
+                      <p className="text-sm font-medium leading-snug text-[#1A1A1A]">
+                        {item.response.content.essentiel}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <p className="line-clamp-1 text-xs italic text-[#1A1A1A]/50 group-hover:text-[#1A1A1A]/60">
-                      &ldquo;{item.prompt}&rdquo;
-                    </p>
-                    <p className="text-sm font-medium leading-snug text-[#1A1A1A]">
-                      {item.response.content.essentiel}
-                    </p>
+                  <div className="mt-5 flex items-center justify-between border-t border-[#E5E3DD] pt-4">
+                    <span className="text-[11px] text-[#1A1A1A]/50 transition group-hover:text-[#1A1A1A]/60">
+                      {item.response.content.cta_label}
+                    </span>
+                    <Link
+                      href={`/modules/${item.response.routing.module_id}`}
+                      className="text-[11px] font-semibold text-[#7C3AED] transition hover:text-[#6D28D9]"
+                    >
+                      Revoir →
+                    </Link>
                   </div>
                 </div>
+              ))}
+            </div>
 
-                <div className="mt-5 flex items-center justify-between border-t border-[#E5E3DD] pt-4">
-                  <span className="text-[11px] text-[#1A1A1A]/50 transition group-hover:text-[#1A1A1A]/60">
-                    {item.response.content.cta_label}
-                  </span>
-                  <Link
-                    href={`/modules/${item.response.routing.module_id}`}
-                    className="text-[11px] font-semibold text-[#7C3AED] transition hover:text-[#6D28D9]"
-                  >
-                    Revoir →
-                  </Link>
+            {archivedHistory.length > 0 && (
+              <SubscriptionGate>
+                <div className="grid gap-5 sm:grid-cols-1 lg:grid-cols-2">
+                  {archivedHistory.map((item) => (
+                    <div
+                      key={item.id}
+                      className={`group flex flex-col justify-between p-6 transition-all hover:shadow-sm ${
+                        PORTAL_COLORS[item.portal_id] || "border-l-2 border-[#7C3AED] bg-[#FBFAF7]"
+                      }`}
+                    >
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between">
+                          <span className="rounded-sm bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#1A1A1A]/70 shadow-sm">
+                            {PORTAL_LABELS[item.portal_id] || item.portal_id}
+                          </span>
+                          <span className="text-[10px] font-medium text-[#1A1A1A]/40">
+                            {new Date(item.timestamp).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="line-clamp-1 text-xs italic text-[#1A1A1A]/50 group-hover:text-[#1A1A1A]/60">
+                            &ldquo;{item.prompt}&rdquo;
+                          </p>
+                          <p className="text-sm font-medium leading-snug text-[#1A1A1A]">
+                            {item.response.content.essentiel}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 flex items-center justify-between border-t border-[#E5E3DD] pt-4">
+                        <span className="text-[11px] text-[#1A1A1A]/50 transition group-hover:text-[#1A1A1A]/60">
+                          {item.response.content.cta_label}
+                        </span>
+                        <Link
+                          href={`/modules/${item.response.routing.module_id}`}
+                          className="text-[11px] font-semibold text-[#7C3AED] transition hover:text-[#6D28D9]"
+                        >
+                          Revoir →
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            ))}
+              </SubscriptionGate>
+            )}
           </div>
         )}
       </section>

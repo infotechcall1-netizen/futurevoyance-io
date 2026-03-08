@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import { oracleOfDay, lifePathFromDate } from "@/app/lib/oracle";
 import { firstNameVibration, vibrationKeyword, vibrationTitle } from "@/lib/numerology";
 import VibrationCalcBlock from "@/app/components/VibrationCalcBlock";
+import SubscriptionGate from "@/app/components/SubscriptionGate";
 
 export const metadata: Metadata = {
   title: "Numérologie · Mon Espace | FutureVoyance",
@@ -143,14 +144,18 @@ export default async function NumerologiePage() {
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#C9A961]">
                 Ton nombre maître de vie
               </p>
+            </div>
+          </div>
+          <SubscriptionGate>
+            <>
               <p className="text-sm leading-relaxed text-[#1A1A1A]/70">
                 Le chemin de vie se calcule à partir de la somme de ta date de naissance. Il révèle ta mission et tes forces profondes.
               </p>
-            </div>
-          </div>
-          {lifePathSteps.length > 0 && (
-            <VibrationCalcBlock type="personal" lifePathSteps={lifePathSteps} />
-          )}
+              {lifePathSteps.length > 0 && (
+                <VibrationCalcBlock type="personal" lifePathSteps={lifePathSteps} />
+              )}
+            </>
+          </SubscriptionGate>
         </section>
       ) : (
         <section className="space-y-4 border border-dashed border-[#E5E3DD] bg-[#FBFAF7] p-8">

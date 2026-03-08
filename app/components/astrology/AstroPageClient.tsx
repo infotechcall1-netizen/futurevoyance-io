@@ -5,6 +5,7 @@ import BirthDataForm from "./BirthDataForm";
 import NatalChartWheel from "./NatalChartWheel";
 import ChartInterpretation from "./ChartInterpretation";
 import AstrologySummaryCard from "./AstrologySummaryCard";
+import SubscriptionGate from "@/app/components/SubscriptionGate";
 import { generateNatalChart } from "@/lib/astrology/engine";
 import type { NatalChart } from "@/lib/astrology/types";
 
@@ -110,66 +111,70 @@ export default function AstroPageClient({
           </section>
 
           {/* Interpretation */}
-          <section>
-            <p className="mb-6 text-xs font-semibold uppercase tracking-[0.28em] text-[#C9A961]">
-              Interprétation
-            </p>
-            <ChartInterpretation chart={chart} />
-          </section>
+          <SubscriptionGate>
+            <>
+              <section>
+                <p className="mb-6 text-xs font-semibold uppercase tracking-[0.28em] text-[#C9A961]">
+                  Interprétation
+                </p>
+                <ChartInterpretation chart={chart} />
+              </section>
 
-          {/* Éphémérides table */}
-          <section>
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-[#C9A961]">
-              Éphémérides de naissance
-            </p>
-            <div className="overflow-x-auto rounded-md border border-[#E5E3DD]">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-[#E5E3DD] bg-[#FBFAF7]">
-                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]/50">
-                      Astre
-                    </th>
-                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]/50">
-                      Signe
-                    </th>
-                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]/50">
-                      Degré
-                    </th>
-                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]/50">
-                      Rétrograde
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {chart.planets.map((planet) => (
-                    <tr
-                      key={planet.planetId}
-                      className="border-b border-[#E5E3DD]/50 last:border-0"
-                    >
-                      <td className="px-4 py-3 font-medium text-[#1A1A1A]">
-                        {planet.symbol} {planet.french}
-                      </td>
-                      <td className="px-4 py-3 text-[#1A1A1A]/70">
-                        {planet.signFrench}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs text-[#1A1A1A]/50">
-                        {planet.degree}° {planet.minutes}&prime;
-                      </td>
-                      <td className="px-4 py-3">
-                        {planet.retrograde ? (
-                          <span className="text-xs font-bold text-[#DB2777]">
-                            R
-                          </span>
-                        ) : (
-                          <span className="text-[#1A1A1A]/20">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+              {/* Éphémérides table */}
+              <section>
+                <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-[#C9A961]">
+                  Éphémérides de naissance
+                </p>
+                <div className="overflow-x-auto rounded-md border border-[#E5E3DD]">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-[#E5E3DD] bg-[#FBFAF7]">
+                        <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]/50">
+                          Astre
+                        </th>
+                        <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]/50">
+                          Signe
+                        </th>
+                        <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]/50">
+                          Degré
+                        </th>
+                        <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]/50">
+                          Rétrograde
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {chart.planets.map((planet) => (
+                        <tr
+                          key={planet.planetId}
+                          className="border-b border-[#E5E3DD]/50 last:border-0"
+                        >
+                          <td className="px-4 py-3 font-medium text-[#1A1A1A]">
+                            {planet.symbol} {planet.french}
+                          </td>
+                          <td className="px-4 py-3 text-[#1A1A1A]/70">
+                            {planet.signFrench}
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-[#1A1A1A]/50">
+                            {planet.degree}° {planet.minutes}&prime;
+                          </td>
+                          <td className="px-4 py-3">
+                            {planet.retrograde ? (
+                              <span className="text-xs font-bold text-[#DB2777]">
+                                R
+                              </span>
+                            ) : (
+                              <span className="text-[#1A1A1A]/20">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </>
+          </SubscriptionGate>
         </>
       )}
     </div>

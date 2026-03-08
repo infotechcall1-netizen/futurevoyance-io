@@ -6,6 +6,7 @@ import { firstNameCompatibility } from "@/lib/numerology";
 import { signCompatibility, ELEMENT_COLORS } from "@/lib/compatibility";
 import { ZODIAC_SIGNS } from "@/lib/astrology/constants";
 import type { Element } from "@/lib/compatibility";
+import SubscriptionGate from "@/app/components/SubscriptionGate";
 
 type Tab = "prenoms" | "signes";
 
@@ -219,7 +220,8 @@ export default function CompatibilitePage() {
           </div>
 
           {signResult && (
-            <div className="max-w-lg space-y-6">
+            <SubscriptionGate>
+              <div className="max-w-lg space-y-6">
               {/* Elements */}
               <div className="flex gap-6 text-center">
                 <div className="flex-1 border border-[#E5E3DD] bg-[#FBFAF7] p-4">
@@ -278,6 +280,7 @@ export default function CompatibilitePage() {
                 </div>
               </div>
             </div>
+            </SubscriptionGate>
           )}
         </section>
       )}
