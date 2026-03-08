@@ -17,6 +17,7 @@ export async function GET() {
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     select: {
+      firstName: true,
       birthDate: true,
       birthCity: true,
       birthLat: true,
@@ -25,7 +26,10 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json({ birthData: user });
+  return NextResponse.json({
+    birthData: user,
+    needsOnboarding: !user?.firstName,
+  });
 }
 
 export async function POST(req: Request) {
@@ -35,43 +39,59 @@ export async function POST(req: Request) {
   }
 
   const body = (await req.json()) as {
-    birthDate: string;
-    birthCity: string;
-    birthLat: number;
-    birthLon: number;
-    birthTimezone: string;
+    firstName?: string;
+    birthDate?: string;
+    birthCity?: string;
+    birthLat?: number;
+    birthLon?: number;
+    birthTimezone?: string;
   };
 
-  // Validate date
-  const date = new Date(body.birthDate);
-  if (isNaN(date.getTime())) {
-    return NextResponse.json({ error: "Date invalide" }, { status: 400 });
+  // Build partial update
+  const data: Record<string, unknown> = {};
+
+  // Optional firstName
+  if (typeof body.firstName === "string" && body.firstName.trim()) {
+    data.firstName = body.firstName.trim();
   }
 
-  // Validate coordinates
-  if (
-    typeof body.birthLat !== "number" ||
-    typeof body.birthLon !== "number" ||
-    body.birthLat < -90 ||
-    body.birthLat > 90 ||
-    body.birthLon < -180 ||
-    body.birthLon > 180
-  ) {
-    return NextResponse.json(
-      { error: "Coordonnées invalides" },
-      { status: 400 }
-    );
+  // Optional birthDate
+  if (body.birthDate) {
+    const date = new Date(body.birthDate);
+    if (isNaN(date.getTime())) {
+      return NextResponse.json({ error: "Date invalide" }, { status: 400 });
+    }
+    data.birthDate = date;
+  }
+
+  // Optional city + coordinates (require all geo fields together)
+  if (body.birthCity || body.birthLat !== undefined || body.birthLon !== undefined) {
+    if (
+      typeof body.birthLat !== "number" ||
+      typeof body.birthLon !== "number" ||
+      body.birthLat < -90 ||
+      body.birthLat > 90 ||
+      body.birthLon < -180 ||
+      body.birthLon > 180
+    ) {
+      return NextResponse.json(
+        { error: "Coordonnées invalides" },
+        { status: 400 }
+      );
+    }
+    data.birthCity = body.birthCity;
+    data.birthLat = body.birthLat;
+    data.birthLon = body.birthLon;
+    data.birthTimezone = body.birthTimezone || "UTC";
+  }
+
+  if (Object.keys(data).length === 0) {
+    return NextResponse.json({ error: "Aucune donnée à mettre à jour" }, { status: 400 });
   }
 
   await prisma.user.update({
     where: { email: session.user.email },
-    data: {
-      birthDate: date,
-      birthCity: body.birthCity,
-      birthLat: body.birthLat,
-      birthLon: body.birthLon,
-      birthTimezone: body.birthTimezone || "UTC",
-    },
+    data,
   });
 
   return NextResponse.json({ success: true });

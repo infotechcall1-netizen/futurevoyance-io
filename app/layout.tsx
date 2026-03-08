@@ -4,6 +4,7 @@ import "./globals.css";
 import Analytics from "./components/Analytics";
 import SiteNavbar from "./components/SiteNavbar";
 import AuthProvider from "./components/AuthProvider";
+import OnboardingGate from "./components/OnboardingGate";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -60,6 +61,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <Analytics />
+          <OnboardingGate />
           <div className="min-h-screen text-[#262626]">
             <div className="fv-symbol-layer" aria-hidden>
               <span className="fv-symbol fv-symbol-1">✶</span>
