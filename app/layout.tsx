@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cinzel, Inter, Space_Grotesk } from "next/font/google";
+import { Cinzel, Inter, Space_Grotesk, Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import Analytics from "./components/Analytics";
 import SiteNavbar from "./components/SiteNavbar";
@@ -18,6 +18,18 @@ const spaceGrotesk = Space_Grotesk({
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair-display",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
@@ -44,7 +56,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${spaceGrotesk.variable} ${cinzel.variable} antialiased fv-page`}
+        className={`${inter.variable} ${spaceGrotesk.variable} ${cinzel.variable} ${playfairDisplay.variable} ${dmSans.variable} antialiased fv-page`}
       >
         <AuthProvider>
           <Analytics />

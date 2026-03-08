@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
 :root {
+  /* ─── Classic (crème) theme ─── */
   --fv-bg: #F9F9F7;
+  --fv-surface: #FBFAF7;
+  --fv-card: rgba(255, 255, 255, 0.5);
   --fv-text: #262626;
+  --fv-muted: #6B7280;
+  --fv-gold: #C9A961;
+  --fv-gold-light: #E8D5A3;
+  --fv-violet: #7C3AED;
   --fv-border: rgba(0, 0, 0, 0.1);
   --fv-border-soft: rgba(0, 0, 0, 0.08);
   --fv-surface-glass: rgba(255, 255, 255, 0.5);
-  --fv-muted: #6B7280;
   --font-playfair: var(--font-cinzel);
   --background: var(--fv-bg);
   --foreground: var(--fv-text);
@@ -18,6 +24,27 @@
   --prevoir: #2563EB;
   --recevoir: #059669;
   --border-light: #E5E3DD;
+}
+
+/* ─── Mystic Luxe dark theme ─── */
+[data-theme="mystic"] {
+  --fv-bg: #0D0B1A;
+  --fv-surface: #14112A;
+  --fv-card: #1C1835;
+  --fv-text: #F5F0E8;
+  --fv-muted: #8B85A0;
+  --fv-gold: #C9A96E;
+  --fv-gold-light: #E8D5A3;
+  --fv-violet: #6B4E9B;
+  --fv-border: #2A2545;
+  --fv-border-soft: rgba(255, 255, 255, 0.06);
+  --fv-surface-glass: rgba(28, 24, 53, 0.7);
+  --background: var(--fv-bg);
+  --foreground: var(--fv-text);
+  --surface-white: #14112A;
+  --accent-violet: #6B4E9B;
+  --accent-gold: #C9A96E;
+  --border-light: #2A2545;
 }
 
 @theme inline {
@@ -111,19 +138,19 @@ body > * {
 }
 
 .fv-card {
-  background: var(--fv-surface-glass);
+  background: var(--fv-card);
   backdrop-filter: blur(4px);
   border: 1px solid var(--fv-border);
   border-radius: 0;
 }
 
 .fv-btn-primary {
-  background: #262626;
-  color: #fff;
-  border: 1px solid #262626;
+  background: var(--fv-text);
+  color: var(--fv-bg);
+  border: 1px solid var(--fv-text);
   text-transform: uppercase;
   letter-spacing: 0.28em;
-  font-family: var(--font-space), sans-serif;
+  font-family: var(--font-space), var(--font-dm-sans), sans-serif;
   font-weight: 500;
   padding: 0.9rem 1.8rem;
 }
@@ -135,26 +162,27 @@ body > * {
 .fv-btn-secondary {
   background: transparent;
   color: var(--fv-text);
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--fv-border);
   text-transform: uppercase;
   letter-spacing: 0.24em;
-  font-family: var(--font-space), sans-serif;
+  font-family: var(--font-space), var(--font-dm-sans), sans-serif;
   padding: 0.85rem 1.6rem;
 }
 
 .fv-btn-secondary:hover {
-  border-color: rgba(0, 0, 0, 0.35);
+  border-color: var(--fv-muted);
 }
 
 .fv-title {
-  font-family: var(--font-cinzel), serif;
+  font-family: var(--font-cinzel), var(--font-playfair-display), serif;
   color: var(--fv-text);
 }
 
 .fv-kicker {
-  font-family: var(--font-space), sans-serif;
+  font-family: var(--font-space), var(--font-dm-sans), sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.3em;
+  color: var(--fv-gold);
 }
 
 .fv-muted {
@@ -167,13 +195,14 @@ body > * {
 }
 
 .fv-input {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-dm-sans), sans-serif;
   color: var(--fv-text);
-  border-color: var(--fv-border-soft);
+  background: var(--fv-surface);
+  border-color: var(--fv-border);
 }
 
 .fv-input::placeholder {
-  color: rgba(38, 38, 38, 0.35);
+  color: var(--fv-muted);
 }
 
 .fv-symbol-layer {
@@ -185,7 +214,8 @@ body > * {
 
 .fv-symbol {
   position: absolute;
-  color: rgba(0, 0, 0, 0.18);
+  color: var(--fv-muted);
+  opacity: 0.18;
   font-family: var(--font-cinzel), serif;
   font-size: clamp(1.15rem, 2vw, 1.8rem);
   user-select: none;
@@ -201,7 +231,7 @@ body > * {
 h1,
 h2,
 h3 {
-  font-family: var(--font-cinzel), serif;
+  font-family: var(--font-cinzel), var(--font-playfair-display), serif;
   color: var(--fv-text);
 }
 
@@ -231,13 +261,13 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid #262626;
+  outline: 2px solid var(--fv-gold);
   outline-offset: 2px;
   border-radius: 0;
 }
 
 ::selection {
-  background: rgba(0, 0, 0, 0.14);
+  background: var(--fv-violet);
   color: var(--fv-text);
 }
 

@@ -76,6 +76,7 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  purchases Purchase[]
 }
 
 model VerificationToken {
@@ -84,4 +85,16 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Purchase {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  content   String?  @db.Text // contenu généré par Gemini
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
