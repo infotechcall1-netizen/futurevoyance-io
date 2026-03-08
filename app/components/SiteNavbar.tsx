@@ -8,10 +8,7 @@ import { trackEvent } from "@/lib/analytics/track";
 
 const NAV_LINKS = [
   { href: "/", label: "Aujourd\u2019hui" },
-  { href: "/comprendre", label: "Comprendre" },
-  { href: "/aimer", label: "Aimer" },
-  { href: "/prevoir", label: "Prévoir" },
-  { href: "/recevoir", label: "Recevoir" },
+  { href: "/mon-espace", label: "Mon Espace" },
 ];
 
 export default function SiteNavbar() {
