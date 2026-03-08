@@ -1,12 +1,9 @@
-import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import Stripe from "stripe";
-import { PRICING_CATALOG } from "@/lib/pricing/catalog";
+import { getServerAuthSession } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
 export const runtime = "nodejs";
-
-import { UID_COOKIE, COOKIE_MAX_AGE } from "@/lib/constants";
 
 export async function POST(req: Request) {
   const secret = process.env.STRIPE_SECRET_KEY;
@@ -17,74 +14,76 @@ export async function POST(req: Request) {
     );
   }
 
+  const priceId = process.env.STRIPE_PREMIUM_PRICE_ID;
+  if (!priceId) {
+    return NextResponse.json(
+      { error: "STRIPE_PREMIUM_PRICE_ID is not configured" },
+      { status: 500 }
+    );
+  }
+
+  const session = await getServerAuthSession();
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+  }
+
   const stripe = new Stripe(secret, {
     apiVersion: "2023-10-16" as unknown as Stripe.LatestApiVersion,
   });
 
-  let body: { module_id?: string; fv_uid?: string } = {};
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true, email: true, stripeCustomerId: true, subscriptionStatus: true },
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
+  }
+
+  // Already subscribed
+  if (user.subscriptionStatus === "active") {
+    return NextResponse.json({ error: "Déjà abonné", url: "/mon-espace" }, { status: 200 });
+  }
+
+  // Retrieve or create Stripe customer
+  let stripeCustomerId = user.stripeCustomerId;
+  if (!stripeCustomerId) {
+    const customer = await stripe.customers.create({
+      email: user.email ?? undefined,
+      metadata: { userId: user.id },
+    });
+    stripeCustomerId = customer.id;
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { stripeCustomerId },
+    });
+  }
+
+  const origin =
+    req.headers.get("origin") ||
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
+    "http://localhost:3000";
+
   try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const module_id = typeof body.module_id === "string" ? body.module_id.trim() : "";
-  if (!module_id) {
-    return NextResponse.json(
-      { error: "module_id is required" },
-      { status: 400 }
-    );
-  }
-
-  const pricing = PRICING_CATALOG[module_id];
-  const priceId = pricing?.stripe_price_id;
-  if (!priceId) {
-    return NextResponse.json(
-      { error: "Unknown module_id or no price configured" },
-      { status: 400 }
-    );
-  }
-
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "http://localhost:3000";
-  const cookieStore = await cookies();
-  const cookieUid = (cookieStore.get(UID_COOKIE)?.value || "").trim();
-  const bodyUid = typeof body.fv_uid === "string" ? body.fv_uid.trim() : "";
-  const fvUid = cookieUid || bodyUid || randomUUID();
-
-  try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      client_reference_id: fvUid,
-      metadata: { module_id, fv_uid: fvUid },
-      success_url: `${baseUrl}/modules/${module_id}?paid=1`,
-      cancel_url: `${baseUrl}/modules/${module_id}?canceled=1`,
+    const checkoutSession = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: stripeCustomerId,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${origin}/mon-espace?subscribed=1`,
+      cancel_url: `${origin}/`,
+      subscription_data: {
+        metadata: { userId: user.id, email: user.email ?? "" },
+      },
     });
 
-    if (!session.url) {
+    if (!checkoutSession.url) {
       return NextResponse.json(
         { error: "Failed to create checkout URL" },
         { status: 500 }
       );
     }
 
-    const res = NextResponse.json({ url: session.url });
-    if (!cookieUid) {
-      res.cookies.set(UID_COOKIE, fvUid, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-        maxAge: COOKIE_MAX_AGE,
-      });
-    }
-    return res;
+    return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Checkout failed" },
@@ -92,3 +91,4 @@ export async function POST(req: Request) {
     );
   }
 }
+

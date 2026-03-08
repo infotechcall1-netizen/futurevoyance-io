@@ -64,6 +64,13 @@ model User {
   birthLon      Float?
   birthTimezone String?
 
+  // Subscription
+  stripeCustomerId   String?   @unique
+  subscriptionId     String?   @unique
+  subscriptionStatus String?   // "active" | "canceled" | "past_due" | "trialing" | null
+  subscriptionPlanId String?   // Stripe price_id
+  subscriptionEnd    DateTime? // current_period_end
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
