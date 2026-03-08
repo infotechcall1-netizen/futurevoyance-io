@@ -5,11 +5,16 @@ import { cookies } from "next/headers";
 import { getServerAuthSession } from "@/lib/auth";
 import { redis } from "@/lib/redis";
 import { UID_COOKIE } from "@/lib/constants";
-import { oracleOfDay } from "@/app/lib/oracle";
+import { oracleOfDay, oraclePersonal } from "@/app/lib/oracle";
 import prisma from "@/lib/prisma";
 import { generateNatalChart } from "@/lib/astrology/engine";
 import AstrologySummaryCard from "@/app/components/astrology/AstrologySummaryCard";
 import type { OracleResponse, PortalId } from "@/lib/oracle/schema";
+import { canAccessPremium } from "@/lib/subscription";
+import VibrationDayCard from "@/app/components/VibrationDayCard";
+import DailyGuidance from "@/app/components/DailyGuidance";
+import SubscriptionGate from "@/app/components/SubscriptionGate";
+import MonthCalendar from "@/app/components/MonthCalendar";
 
 export const metadata: Metadata = {
   title: "Mon Espace | FutureVoyance",
@@ -43,7 +48,7 @@ type HistoryItem = {
 async function getHistory(userKey: string): Promise<HistoryItem[]> {
   if (!redis) return [];
   try {
-    const data = await redis.lrange(`fv:history:${userKey.toLowerCase()}`, 0, 2);
+    const data = await redis.lrange(`fv:history:${userKey.toLowerCase()}`, 0, 4);
     return data
       .map((item) => {
         try {
@@ -58,37 +63,6 @@ async function getHistory(userKey: string): Promise<HistoryItem[]> {
   }
 }
 
-const HUB_LINKS = [
-  {
-    href: "/mon-espace/numerologie",
-    icon: "∞",
-    label: "Numérologie",
-    desc: "Chemin de vie & vibration du prénom",
-    color: "#7C3AED",
-  },
-  {
-    href: "/mon-espace/astrologie",
-    icon: "☉",
-    label: "Thème Astral",
-    desc: "Carte du ciel & ascendant",
-    color: "#C9A961",
-  },
-  {
-    href: "/mon-espace/compatibilite",
-    icon: "♡",
-    label: "Compatibilité",
-    desc: "Prénoms & signes astraux",
-    color: "#DB2777",
-  },
-  {
-    href: "/mon-espace/historique",
-    icon: "◎",
-    label: "Historique",
-    desc: "Tes tirages passés",
-    color: "#059669",
-  },
-];
-
 export default async function MonEspacePage() {
   const session = await getServerAuthSession();
   const cookieStore = await cookies();
@@ -98,31 +72,43 @@ export default async function MonEspacePage() {
     redirect("/login?callbackUrl=/mon-espace");
   }
 
-  const dayOracle = oracleOfDay(new Date());
+  const today = new Date();
   const history = await getHistory(userKey);
 
   // Fetch user data for name + birth data
   let displayName: string | null = null;
   let chart = null;
+  let dayOracle = oracleOfDay(today);
+  let isPersonal = false;
+  let isPremium = false;
 
   if (session?.user?.email) {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: {
-        firstName: true,
-        name: true,
-        birthDate: true,
-        birthLat: true,
-        birthLon: true,
-        birthCity: true,
-        birthTimezone: true,
-      },
-    });
+    const [user, premium] = await Promise.all([
+      prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: {
+          firstName: true,
+          name: true,
+          birthDate: true,
+          birthLat: true,
+          birthLon: true,
+          birthCity: true,
+          birthTimezone: true,
+        },
+      }),
+      canAccessPremium(session.user.email),
+    ]);
 
+    isPremium = premium;
     displayName = user?.firstName || user?.name || null;
 
     const hasBirthData =
       !!user?.birthDate && user.birthLat != null && user.birthLon != null;
+
+    if (user?.birthDate) {
+      dayOracle = oraclePersonal(today, user.birthDate.toISOString());
+      isPersonal = true;
+    }
 
     if (hasBirthData && user.birthDate && user.birthLat != null && user.birthLon != null) {
       chart = generateNatalChart(
@@ -136,39 +122,64 @@ export default async function MonEspacePage() {
     }
   }
 
+  const dayMessage = isPersonal ? dayOracle.personalMessage : dayOracle.dailyMessage;
+  const dayRitual = isPersonal ? dayOracle.personalRitual : dayOracle.dailyRitual;
+
   return (
     <div className="space-y-16">
-      {/* Header */}
+      {/* 1 — Header */}
       <header className="space-y-4">
         <h1 className="font-[family-name:var(--font-playfair)] text-4xl font-semibold tracking-tight text-[#1A1A1A] md:text-5xl">
           {displayName ? `Bonjour, ${displayName}` : "Mon Espace"}
         </h1>
-        <div className="flex items-center gap-3 text-sm text-[#1A1A1A]/50">
-          <span>Vibration du jour</span>
-          <span className="font-semibold text-[#C9A961]">{dayOracle.vibration} · {dayOracle.keyword}</span>
-        </div>
       </header>
 
-      {/* Quick links grid */}
-      <section>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {HUB_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="group flex flex-col gap-3 border border-[#E5E3DD] bg-[#FBFAF7] p-5 transition-all hover:shadow-sm hover:border-[#1A1A1A]/20"
-            >
-              <span className="text-2xl" style={{ color: link.color }}>{link.icon}</span>
-              <div>
-                <p className="font-medium text-[#1A1A1A] group-hover:text-[#1A1A1A]">{link.label}</p>
-                <p className="mt-0.5 text-xs text-[#1A1A1A]/50">{link.desc}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+      {/* 1b — Vibration du jour */}
+      <VibrationDayCard
+        vibration={dayOracle.vibration}
+        title={dayOracle.title}
+        keyword={dayOracle.keyword}
+        message={dayMessage}
+        ritual={dayRitual}
+        isPremium={isPremium}
+      />
+
+      {/* 2 — Guidance quotidienne (premium) */}
+      {displayName && (
+        <SubscriptionGate>
+          <DailyGuidance
+            firstName={displayName}
+            date={today}
+            vibration={dayOracle}
+            sunSign={chart?.sunSign}
+            risingSign={chart?.risingSign}
+          />
+        </SubscriptionGate>
+      )}
+
+      {/* 3 — Quick actions */}
+      <section className="grid grid-cols-2 gap-4">
+        <Link
+          href="/mon-espace/oracle"
+          className="group flex items-center gap-3 border border-[#E5E3DD] bg-[#FBFAF7] p-5 transition-all hover:border-[#7C3AED]/40 hover:shadow-sm"
+        >
+          <span className="text-2xl text-[#7C3AED]">◎</span>
+          <span className="text-sm font-medium text-[#1A1A1A] group-hover:text-[#7C3AED] transition-colors">
+            Poser une question à l&apos;Oracle&nbsp;→
+          </span>
+        </Link>
+        <Link
+          href="/mon-espace/compatibilite"
+          className="group flex items-center gap-3 border border-[#E5E3DD] bg-[#FBFAF7] p-5 transition-all hover:border-[#DB2777]/40 hover:shadow-sm"
+        >
+          <span className="text-2xl text-[#DB2777]">♡</span>
+          <span className="text-sm font-medium text-[#1A1A1A] group-hover:text-[#DB2777] transition-colors">
+            Ma compatibilité&nbsp;→
+          </span>
+        </Link>
       </section>
 
-      {/* Signature astrale */}
+      {/* 4 — Signature astrale */}
       {chart && (
         <section className="space-y-4">
           <div className="flex items-center justify-between border-b border-[#E5E3DD] pb-3">
@@ -183,10 +194,30 @@ export default async function MonEspacePage() {
             </Link>
           </div>
           <AstrologySummaryCard chart={chart} />
+
+          {/* Navigation légère */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 text-xs font-medium text-[#1A1A1A]/50">
+            <Link href="/mon-espace/numerologie" className="underline underline-offset-2 transition hover:text-[#7C3AED]">
+              Voir ma numérologie
+            </Link>
+            <span className="text-[#E5E3DD]">·</span>
+            <Link href="/mon-espace/astrologie" className="underline underline-offset-2 transition hover:text-[#C9A961]">
+              Mon thème complet
+            </Link>
+            <span className="text-[#E5E3DD]">·</span>
+            <Link href="/mon-espace/historique" className="underline underline-offset-2 transition hover:text-[#059669]">
+              Mon historique
+            </Link>
+          </div>
         </section>
       )}
 
-      {/* Historique récent */}
+      {/* 5 — Calendrier avec streak */}
+      <section>
+        <MonthCalendar />
+      </section>
+
+      {/* 6 — Dernières vibrations */}
       <section className="space-y-6">
         <div className="flex items-center justify-between border-b border-[#E5E3DD] pb-3">
           <h2 className="font-[family-name:var(--font-playfair)] text-xl font-medium text-[#1A1A1A]">
@@ -236,7 +267,7 @@ export default async function MonEspacePage() {
         )}
       </section>
 
-      {/* Rituels & Pratiques (Bientôt) */}
+      {/* 7 — Rituels & Pratiques (Bientôt) */}
       <section className="space-y-4 border-l-2 border-[#C9A961] bg-[#FBFAF7] px-6 py-8 opacity-70">
         <div className="flex items-center gap-2">
           <div className="size-2 rounded-full bg-[#C9A961] animate-pulse" />
